@@ -111,7 +111,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	// Auto-copy files if enabled
 	if !noCopy {
 		root, _ := repo.GetRoot()
-		if err := autoCopyFiles(root, result.WorktreePath); err != nil {
+		if err := autoCopyFiles(root, result.WorktreePath, repo); err != nil {
 			fmt.Printf("⚠️  Auto-copy failed: %v\n", err)
 		}
 	}

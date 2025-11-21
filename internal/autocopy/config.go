@@ -16,11 +16,14 @@ type AutoCopyConfig struct {
 
 // AutoCopyItem represents a single item to be copied
 type AutoCopyItem struct {
-	Path       string `json:"path"`
-	Directory  *bool  `json:"directory,omitempty"`
-	Recursive  bool   `json:"recursive"`
-	RootOnly   bool   `json:"rootOnly"`
-	AutoDetect bool   `json:"autoDetect"`
+	Path       string   `json:"path"`
+	Directory  *bool    `json:"directory,omitempty"`
+	Recursive  bool     `json:"recursive"`
+	RootOnly   bool     `json:"rootOnly"`
+	AutoDetect bool     `json:"autoDetect"`
+	UseGlob    bool     `json:"useGlob"`
+	Exclude    []string `json:"exclude,omitempty"`
+	Include    []string `json:"include,omitempty"`
 }
 
 // IsDirectory returns true if the item should be treated as a directory

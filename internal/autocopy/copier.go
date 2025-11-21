@@ -6,16 +6,163 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+
+	"github.com/keisukeshimizu/hatcher/internal/git"
 )
+
+// AutoCopierOptions contains options for the AutoCopier
+type AutoCopierOptions struct {
+	NoGitignoreUpdate bool // Skip updating .gitignore
+	UseParallel       bool // Use parallel processing
+	MaxWorkers        int  // Maximum number of worker goroutines
+	BufferSize        int  // Buffer size for file copying
+	ShowProgress      bool // Show progress updates
+	VerifyIntegrity   bool // Verify file integrity after copying
+}
 
 // AutoCopier handles automatic file copying operations
 type AutoCopier struct {
-	// Future: add configuration options like parallel workers, etc.
+	repo    git.Repository
+	config  *AutoCopyConfig
+	options AutoCopierOptions
 }
 
 // NewAutoCopier creates a new AutoCopier instance
-func NewAutoCopier() *AutoCopier {
-	return &AutoCopier{}
+func NewAutoCopier(repo git.Repository, config *AutoCopyConfig, options AutoCopierOptions) *AutoCopier {
+	// Set default options
+	if options.MaxWorkers <= 0 {
+		options.MaxWorkers = 4
+	}
+	if options.BufferSize <= 0 {
+		options.BufferSize = 64 * 1024 // 64KB
+	}
+
+	return &AutoCopier{
+		repo:    repo,
+		config:  config,
+		options: options,
+	}
+}
+
+// Run executes the auto-copy operation
+func (ac *AutoCopier) Run(sourceDir, destDir string) error {
+	if ac.config == nil {
+		return fmt.Errorf("no configuration loaded")
+	}
+
+	// Use parallel copier if enabled
+	if ac.options.UseParallel {
+		return ac.runParallel(sourceDir, destDir)
+	}
+
+	// Use sequential copier (original implementation)
+	return ac.runSequential(sourceDir, destDir)
+}
+
+// runParallel executes the auto-copy operation using parallel processing
+func (ac *AutoCopier) runParallel(sourceDir, destDir string) error {
+	parallelOptions := ParallelCopyOptions{
+		MaxWorkers:      ac.options.MaxWorkers,
+		BufferSize:      ac.options.BufferSize,
+		ShowProgress:    ac.options.ShowProgress,
+		VerifyIntegrity: ac.options.VerifyIntegrity,
+		ContinueOnError: true, // Continue on individual file errors
+	}
+
+	// Set up progress callback if needed
+	if ac.options.ShowProgress {
+		parallelOptions.ProgressCallback = func(update ProgressUpdate) {
+			switch update.Type {
+			case ProgressTypeStart:
+				fmt.Printf("🚀 %s\n", update.Message)
+			case ProgressTypeProgress:
+				fmt.Printf("📋 %s (%.1f%%)\n", update.Message, update.Percentage)
+			case ProgressTypeComplete:
+				fmt.Printf("✅ %s in %v\n", update.Message, update.ElapsedTime)
+			}
+		}
+	}
+
+	// Track copied files for .gitignore update
+	var copiedFiles []string
+	var copiedFilesMutex sync.Mutex
+
+	parallelOptions.ErrorCallback = func(err CopyError) {
+		fmt.Printf("⚠️  Failed to copy %s: %v\n", err.SourcePath, err.Error)
+	}
+
+	// Create parallel copier
+	copier := NewParallelCopier(ac.repo, ac.config, parallelOptions)
+
+	// Execute parallel copy
+	if err := copier.Run(sourceDir, destDir); err != nil {
+		return fmt.Errorf("parallel copy failed: %w", err)
+	}
+
+	// Collect copied files for .gitignore update
+	// This is a simplified approach - in a real implementation,
+	// you'd want to track this during the copy operation
+	for _, item := range ac.config.Items {
+		files, err := ac.findCopiedFiles(destDir, item)
+		if err != nil {
+			continue // Continue on error
+		}
+		copiedFilesMutex.Lock()
+		copiedFiles = append(copiedFiles, files...)
+		copiedFilesMutex.Unlock()
+	}
+
+	// Update .gitignore if we copied any files
+	if len(copiedFiles) > 0 && !ac.options.NoGitignoreUpdate {
+		if err := ac.repo.UpdateGitignore(copiedFiles); err != nil {
+			return fmt.Errorf("failed to update .gitignore: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// runSequential executes the auto-copy operation sequentially (original implementation)
+func (ac *AutoCopier) runSequential(sourceDir, destDir string) error {
+	copiedFiles, err := ac.CopyFiles(sourceDir, destDir, ac.config)
+	if err != nil {
+		return err
+	}
+
+	// Update .gitignore if we copied any files
+	if len(copiedFiles) > 0 && !ac.options.NoGitignoreUpdate {
+		if err := ac.repo.UpdateGitignore(copiedFiles); err != nil {
+			return fmt.Errorf("failed to update .gitignore: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// findCopiedFiles finds files that were copied for a given item
+func (ac *AutoCopier) findCopiedFiles(destDir string, item AutoCopyItem) ([]string, error) {
+	var files []string
+	destPath := filepath.Join(destDir, item.Path)
+
+	// Check if destination exists
+	info, err := os.Stat(destPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return files, nil // No files copied
+		}
+		return files, err
+	}
+
+	if info.IsDir() {
+		// For directories, add the directory itself
+		files = append(files, item.Path)
+	} else {
+		// For files, add the file
+		files = append(files, item.Path)
+	}
+
+	return files, nil
 }
 
 // CopyFiles copies files according to the configuration

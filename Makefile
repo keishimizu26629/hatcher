@@ -92,6 +92,52 @@ coverage:
 	$(GOCMD) tool cover -html=coverage.out -o coverage.html
 	@echo "✅ Coverage report generated: coverage.html"
 
+# Run tests with race detection
+test-race:
+	@echo "🏃 Running tests with race detection..."
+	$(GOTEST) -v -race ./...
+
+# Run benchmark tests
+test-bench:
+	@echo "⚡ Running benchmark tests..."
+	$(GOTEST) -v -bench=. -benchmem ./...
+
+# Run tests with verbose coverage
+test-coverage-verbose:
+	@echo "📊 Running tests with detailed coverage..."
+	$(GOTEST) -v -coverprofile=coverage.out -covermode=atomic ./...
+	$(GOCMD) tool cover -func=coverage.out
+	$(GOCMD) tool cover -html=coverage.out -o coverage.html
+	@echo "✅ Detailed coverage report generated"
+
+# Run all test suites
+test-all: test test-race test-bench
+	@echo "✅ All test suites completed"
+
+# Run tests with timeout
+test-timeout:
+	@echo "⏰ Running tests with timeout..."
+	$(GOTEST) -v -timeout=5m ./...
+
+# Run tests for specific package
+test-package:
+	@echo "📦 Running tests for package: $(PKG)"
+	@if [ -z "$(PKG)" ]; then \
+		echo "❌ Please specify package: make test-package PKG=./internal/git"; \
+		exit 1; \
+	fi
+	$(GOTEST) -v $(PKG)
+
+# Generate test report
+test-report:
+	@echo "📋 Generating test report..."
+	@mkdir -p reports
+	$(GOTEST) -v -json ./... > reports/test-results.json
+	$(GOTEST) -v -coverprofile=reports/coverage.out ./...
+	$(GOCMD) tool cover -html=reports/coverage.out -o reports/coverage.html
+	$(GOCMD) tool cover -func=reports/coverage.out > reports/coverage.txt
+	@echo "✅ Test reports generated in reports/ directory"
+
 # Lint code
 lint:
 	@echo "🔍 Running linter..."
