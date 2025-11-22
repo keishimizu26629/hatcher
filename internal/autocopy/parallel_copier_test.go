@@ -11,7 +11,6 @@ import (
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
 	"github.com/keisukeshimizu/hatcher/test/testutil"
-	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

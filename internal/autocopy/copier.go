@@ -56,34 +56,346 @@ type LegacyAutoCopier struct{}
 
 // CopyFiles provides legacy interface for file copying
 func (lac *LegacyAutoCopier) CopyFiles(sourceDir, destDir string, config *AutoCopyConfig) ([]string, error) {
-	// Create a minimal git repository interface for legacy usage
-	repo := &git.GitRepository{}
-
-	// Create AutoCopier with default options
-	copier := NewAutoCopier(repo, config, AutoCopierOptions{
-		MaxWorkers: 4,
-		BufferSize: 64 * 1024,
-	})
-
-	err := copier.Run(sourceDir, destDir)
-	if err != nil {
-		return nil, err
+	if config == nil {
+		return []string{}, nil
 	}
 
-	// Return copied files (simplified for legacy compatibility)
-	return []string{}, nil
+	var copiedFiles []string
+
+	// Handle legacy format
+	if config.Version == 0 && len(config.Files) > 0 {
+		for _, file := range config.Files {
+			copied, err := lac.copySinglePath(sourceDir, destDir, file)
+			if err != nil {
+				return nil, err
+			}
+			if copied {
+				copiedFiles = append(copiedFiles, file)
+			}
+		}
+		return copiedFiles, nil
+	}
+
+	// Handle new format
+	for _, item := range config.Items {
+		if item.IsGlobPattern() || (item.Recursive && !item.RootOnly) {
+			// Use glob pattern processing for recursive searches
+			pattern := item.Path
+			if item.Recursive && !item.IsGlobPattern() && !item.RootOnly {
+				// Convert to recursive glob pattern
+				pattern = "**/" + item.Path
+			}
+			files, err := lac.ProcessGlobPatternWithOptions(pattern, sourceDir, destDir, item)
+			if err != nil {
+				return nil, err
+			}
+			copiedFiles = append(copiedFiles, files...)
+		} else {
+			copied, err := lac.copySingleItem(sourceDir, destDir, item)
+			if err != nil {
+				return nil, err
+			}
+			copiedFiles = append(copiedFiles, copied...)
+		}
+	}
+
+	return copiedFiles, nil
+}
+
+// ProcessGlobPatternWithOptions provides glob processing with item options
+func (lac *LegacyAutoCopier) ProcessGlobPatternWithOptions(pattern, sourceDir, destDir string, item AutoCopyItem) ([]string, error) {
+	// Handle recursive patterns (starting with **/)
+	if strings.HasPrefix(pattern, "**/") {
+		filename := strings.TrimPrefix(pattern, "**/")
+		return lac.findRecursiveFilesWithRootOnly(filename, sourceDir, destDir, item.RootOnly)
+	}
+
+	// Use regular glob processing
+	return lac.ProcessGlobPattern(pattern, sourceDir, destDir)
 }
 
 // ProcessGlobPattern provides legacy interface for glob processing
 func (lac *LegacyAutoCopier) ProcessGlobPattern(pattern, sourceDir, destDir string) ([]string, error) {
-	// Simplified glob processing for legacy compatibility
-	return []string{}, nil
+	var copiedFiles []string
+
+	// Handle recursive patterns (starting with **/)
+	if strings.HasPrefix(pattern, "**/") {
+		filename := strings.TrimPrefix(pattern, "**/")
+		return lac.findRecursiveFiles(filename, sourceDir, destDir)
+	}
+
+	// Use filepath.Glob to find matching files
+	searchPattern := filepath.Join(sourceDir, pattern)
+	matches, err := filepath.Glob(searchPattern)
+	if err != nil {
+		return nil, fmt.Errorf("glob pattern error: %w", err)
+	}
+
+	for _, match := range matches {
+		// Get relative path from source directory
+		relPath, err := filepath.Rel(sourceDir, match)
+		if err != nil {
+			continue
+		}
+
+		destPath := filepath.Join(destDir, relPath)
+
+		// Check if it's a file or directory
+		info, err := os.Stat(match)
+		if err != nil {
+			continue
+		}
+
+		if info.IsDir() {
+			err = lac.copyDirectory(match, destPath, true)
+		} else {
+			err = lac.copyFile(match, destPath)
+		}
+
+		if err == nil {
+			copiedFiles = append(copiedFiles, relPath)
+		}
+	}
+
+	return copiedFiles, nil
+}
+
+// findRecursiveFiles finds files recursively using filepath.Walk
+func (lac *LegacyAutoCopier) findRecursiveFiles(filename, sourceDir, destDir string) ([]string, error) {
+	var copiedFiles []string
+
+	err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip directories
+		if info.IsDir() {
+			return nil
+		}
+
+		// Check if filename matches
+		if filepath.Base(path) == filename {
+			// Get relative path from source directory
+			relPath, err := filepath.Rel(sourceDir, path)
+			if err != nil {
+				return err
+			}
+
+			destPath := filepath.Join(destDir, relPath)
+
+			// Copy the file
+			if err := lac.copyFile(path, destPath); err != nil {
+				return err
+			}
+
+			copiedFiles = append(copiedFiles, relPath)
+		}
+
+		return nil
+	})
+
+	return copiedFiles, err
+}
+
+// findRecursiveFilesWithRootOnly finds files recursively with rootOnly option
+func (lac *LegacyAutoCopier) findRecursiveFilesWithRootOnly(filename, sourceDir, destDir string, rootOnly bool) ([]string, error) {
+	var copiedFiles []string
+
+	if rootOnly {
+		// Only check root level
+		rootPath := filepath.Join(sourceDir, filename)
+		if info, err := os.Stat(rootPath); err == nil && !info.IsDir() {
+			destPath := filepath.Join(destDir, filename)
+			if err := lac.copyFile(rootPath, destPath); err != nil {
+				return nil, err
+			}
+			copiedFiles = append(copiedFiles, filename)
+		}
+		return copiedFiles, nil
+	}
+
+	// Use regular recursive search
+	return lac.findRecursiveFiles(filename, sourceDir, destDir)
 }
 
 // UpdateGitignore provides legacy interface for gitignore updates
 func (lac *LegacyAutoCopier) UpdateGitignore(repoDir string, files []string) error {
-	// Simplified gitignore update for legacy compatibility
+	if len(files) == 0 {
+		return nil
+	}
+
+	gitignorePath := filepath.Join(repoDir, ".gitignore")
+
+	// Read existing .gitignore content
+	var existingContent string
+	if data, err := os.ReadFile(gitignorePath); err == nil {
+		existingContent = string(data)
+	}
+
+	// Check if we already have our section
+	if strings.Contains(existingContent, "# Auto-copied files (added by hatcher)") {
+		return nil // Already updated
+	}
+
+	// Prepare new content to append
+	var newContent strings.Builder
+	if existingContent != "" && !strings.HasSuffix(existingContent, "\n") {
+		newContent.WriteString("\n")
+	}
+	newContent.WriteString("\n# Auto-copied files (added by hatcher)\n")
+	for _, file := range files {
+		newContent.WriteString(file + "\n")
+	}
+
+	// Append to .gitignore
+	file, err := os.OpenFile(gitignorePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open .gitignore: %w", err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(newContent.String())
+	return err
+}
+
+// copySinglePath copies a single file or directory path
+func (lac *LegacyAutoCopier) copySinglePath(sourceDir, destDir, path string) (bool, error) {
+	sourcePath := filepath.Join(sourceDir, path)
+	destPath := filepath.Join(destDir, path)
+
+	// Check if source exists
+	info, err := os.Stat(sourcePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil // Skip non-existent files
+		}
+		return false, err
+	}
+
+	if info.IsDir() {
+		return true, lac.copyDirectory(sourcePath, destPath, false)
+	} else {
+		return true, lac.copyFile(sourcePath, destPath)
+	}
+}
+
+// copySingleItem copies a single AutoCopyItem
+func (lac *LegacyAutoCopier) copySingleItem(sourceDir, destDir string, item AutoCopyItem) ([]string, error) {
+	sourcePath := filepath.Join(sourceDir, item.Path)
+	destPath := filepath.Join(destDir, item.Path)
+
+	// Check if source exists
+	info, err := os.Stat(sourcePath)
+	if err != nil {
+		if os.IsNotExist(err) && item.AutoDetect {
+			return []string{}, nil // Skip non-existent files when auto-detecting
+		}
+		if os.IsNotExist(err) {
+			return []string{}, nil // Skip non-existent files
+		}
+		return nil, err
+	}
+
+	if info.IsDir() {
+		if item.Directory != nil && !*item.Directory {
+			return nil, fmt.Errorf("expected file but found directory: %s", sourcePath)
+		}
+		// For directories, always copy contents unless explicitly set to false
+		recursive := item.Recursive
+		if item.Directory != nil && *item.Directory {
+			recursive = true // Default to recursive for explicitly marked directories
+		}
+		err = lac.copyDirectory(sourcePath, destPath, recursive)
+		if err != nil {
+			return nil, err
+		}
+		return []string{item.Path}, nil
+	} else {
+		if item.Directory != nil && *item.Directory {
+			return nil, fmt.Errorf("expected directory but found file: %s", sourcePath)
+		}
+		err = lac.copyFile(sourcePath, destPath)
+		if err != nil {
+			return nil, err
+		}
+		return []string{item.Path}, nil
+	}
+}
+
+// copyFile copies a single file
+func (lac *LegacyAutoCopier) copyFile(sourcePath, destPath string) error {
+	// Create destination directory if it doesn't exist
+	destDir := filepath.Dir(destPath)
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return fmt.Errorf("failed to create destination directory %s: %w", destDir, err)
+	}
+
+	// Open source file
+	sourceFile, err := os.Open(sourcePath)
+	if err != nil {
+		return fmt.Errorf("failed to open source file %s: %w", sourcePath, err)
+	}
+	defer sourceFile.Close()
+
+	// Create destination file
+	destFile, err := os.Create(destPath)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file %s: %w", destPath, err)
+	}
+	defer destFile.Close()
+
+	// Copy content
+	_, err = io.Copy(destFile, sourceFile)
+	if err != nil {
+		return fmt.Errorf("failed to copy file content: %w", err)
+	}
+
+	// Copy permissions
+	sourceInfo, err := os.Stat(sourcePath)
+	if err == nil {
+		os.Chmod(destPath, sourceInfo.Mode())
+	}
+
 	return nil
+}
+
+// copyDirectory copies a directory and optionally its contents
+func (lac *LegacyAutoCopier) copyDirectory(sourcePath, destPath string, recursive bool) error {
+	// Create destination directory
+	if err := os.MkdirAll(destPath, 0755); err != nil {
+		return fmt.Errorf("failed to create destination directory %s: %w", destPath, err)
+	}
+
+	if !recursive {
+		return nil // Only create the directory structure, not contents
+	}
+
+	// Copy directory contents recursively
+	return filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip the root directory itself
+		if path == sourcePath {
+			return nil
+		}
+
+		// Get relative path from source
+		relPath, err := filepath.Rel(sourcePath, path)
+		if err != nil {
+			return err
+		}
+
+		destItemPath := filepath.Join(destPath, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(destItemPath, info.Mode())
+		} else {
+			return lac.copyFile(path, destItemPath)
+		}
+	})
 }
 
 // Run executes the auto-copy operation
@@ -166,14 +478,16 @@ func (ac *AutoCopier) runParallel(sourceDir, destDir string) error {
 
 // runSequential executes the auto-copy operation sequentially (original implementation)
 func (ac *AutoCopier) runSequential(sourceDir, destDir string) error {
-	copiedFiles, err := ac.CopyFiles(sourceDir, destDir, ac.config)
+	// Use legacy copier for sequential processing
+	legacyCopier := NewLegacyAutoCopier()
+	copiedFiles, err := legacyCopier.CopyFiles(sourceDir, destDir, ac.config)
 	if err != nil {
 		return err
 	}
 
 	// Update .gitignore if we copied any files
 	if len(copiedFiles) > 0 && !ac.options.NoGitignoreUpdate {
-		if err := ac.repo.UpdateGitignore(copiedFiles); err != nil {
+		if err := legacyCopier.UpdateGitignore(destDir, copiedFiles); err != nil {
 			return fmt.Errorf("failed to update .gitignore: %w", err)
 		}
 	}
