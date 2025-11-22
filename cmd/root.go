@@ -43,7 +43,7 @@ Examples:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Update logger verbose setting
 		logger.UpdateVerbose()
-		
+
 		if len(args) == 1 {
 			// If branch name is provided, run create command
 			return runCreate(cmd, args)

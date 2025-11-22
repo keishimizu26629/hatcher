@@ -49,7 +49,7 @@ func init() {
 
 func runCreate(cmd *cobra.Command, args []string) error {
 	branchName := args[0]
-	
+
 	// Update logger verbose setting
 	logger.UpdateVerbose()
 	log := logger.GetLogger()

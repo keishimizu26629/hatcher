@@ -16,27 +16,49 @@ A powerful command-line tool that simplifies Git worktree management with automa
 
 ## 📦 Installation
 
-### Prerequisites
-- Git 2.5+ (for worktree support)
-- Go 1.21+ (for building from source)
+### Quick Install (Recommended)
+```bash
+# One-liner installation (no Homebrew tap required)
+curl -fsSL https://keishimizu26629.github.io/hatcher/install.sh | bash
+```
+
+This installs both `hatcher` and `hch` commands to `/usr/local/bin/`.
+
+### Homebrew
+```bash
+# Add tap and install
+brew tap keishimizu26629/tap
+brew install hatcher
+
+# Or install without keeping the tap
+brew install keishimizu26629/tap/hatcher
+```
+
+### Manual Installation
+```bash
+# Download latest release
+curl -fsSL https://github.com/keishimizu26629/hatcher/releases/latest/download/hatcher-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m) -o hatcher
+
+# Make executable and install
+chmod +x hatcher
+sudo mv hatcher /usr/local/bin/
+
+# Create hch alias
+sudo ln -sf /usr/local/bin/hatcher /usr/local/bin/hch
+```
 
 ### From Source
 ```bash
-# Clone the repository
-git clone https://github.com/keisukeshimizu/hatcher.git
+# Prerequisites: Git 2.5+, Go 1.22+
+git clone https://github.com/keishimizu26629/hatcher.git
 cd hatcher
-
-# Build and install
 make install
-
-# Or build manually
-go build -o hatcher main.go
-cp hatcher /usr/local/bin/
 ```
 
-### Using Go Install
+### Uninstall
 ```bash
-go install github.com/keisukeshimizu/hatcher@latest
+# Remove Hatcher completely
+curl -fsSL https://keishimizu26629.github.io/hatcher/uninstall.sh | bash
 ```
 
 ## 🎯 Quick Start
