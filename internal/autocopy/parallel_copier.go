@@ -170,15 +170,7 @@ func (pc *ParallelCopier) Run(sourceDir, destDir string) error {
 	// Wait for all workers to complete
 	pc.wg.Wait()
 
-	// Close channels
-	close(pc.progress)
-	close(pc.errors)
-
-	// Wait for handlers to finish
-	progressWg.Wait()
-	errorWg.Wait()
-
-	// Send completion progress update
+	// Send completion progress update before closing channels
 	if pc.options.ShowProgress {
 		pc.sendProgressUpdate(ProgressUpdate{
 			Type:        ProgressTypeComplete,
@@ -191,6 +183,14 @@ func (pc *ParallelCopier) Run(sourceDir, destDir string) error {
 			ElapsedTime: time.Since(pc.startTime),
 		})
 	}
+
+	// Close channels
+	close(pc.progress)
+	close(pc.errors)
+
+	// Wait for handlers to finish
+	progressWg.Wait()
+	errorWg.Wait()
 
 	return nil
 }
@@ -482,7 +482,7 @@ func (pc *ParallelCopier) copyWithVerification(sourceFile, destFile *os.File, so
 
 // sendProgressUpdate sends a progress update
 func (pc *ParallelCopier) sendProgressUpdate(update ProgressUpdate) {
-	if pc.options.ShowProgress {
+	if pc.options.ShowProgress && pc.progress != nil {
 		select {
 		case pc.progress <- update:
 		default:

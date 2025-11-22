@@ -1,7 +1,6 @@
 package autocopy
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
