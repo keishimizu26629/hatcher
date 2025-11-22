@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRemover_RemoveWorktree(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "remover-test")
+	testRepo := testutil.NewTestGitRepository(t, "remover-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -167,7 +167,7 @@ func TestRemover_RemoveWorktree(t *testing.T) {
 
 func TestRemover_ValidateRemoval(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "validate-test")
+	testRepo := testutil.NewTestGitRepository(t, "validate-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -249,7 +249,7 @@ func TestRemover_ValidateRemoval(t *testing.T) {
 
 func TestRemover_GetRemovalPlan(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "plan-test")
+	testRepo := testutil.NewTestGitRepository(t, "plan-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -318,7 +318,7 @@ func TestRemover_GetRemovalPlan(t *testing.T) {
 
 func TestRemover_ConfirmRemoval(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "confirm-test")
+	testRepo := testutil.NewTestGitRepository(t, "confirm-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 

@@ -224,10 +224,10 @@ checksums: release
 
 # Docker build (if Dockerfile exists)
 docker:
-	@if [ -f Dockerfile ]; then \
+	@if [ -f deployments/docker/Dockerfile ]; then \
 		echo "🐳 Building Docker image..."; \
-		docker build -t $(BINARY_NAME):$(VERSION) .; \
-		docker build -t $(BINARY_NAME):latest .; \
+		docker build -f deployments/docker/Dockerfile -t $(BINARY_NAME):$(VERSION) .; \
+		docker build -f deployments/docker/Dockerfile -t $(BINARY_NAME):latest .; \
 		echo "✅ Docker image built: $(BINARY_NAME):$(VERSION)"; \
 	else \
 		echo "⚠️  Dockerfile not found"; \

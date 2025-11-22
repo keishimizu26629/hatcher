@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/internal/testutil"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

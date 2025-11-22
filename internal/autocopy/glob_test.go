@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGlobPatternMatching(t *testing.T) {
 	// Create test repository with complex file structure
-	testRepo := helpers.NewTestGitRepository(t, "glob-complex-test")
+	testRepo := testutil.NewTestGitRepository(t, "glob-complex-test")
 
 	// Create complex directory structure
 	testRepo.CreateDirectory("src/components")
@@ -297,7 +297,7 @@ func TestGlobPatternDetection(t *testing.T) {
 
 func TestGlobPatternPerformance(t *testing.T) {
 	// Create a large directory structure for performance testing
-	testRepo := helpers.NewTestGitRepository(t, "perf-test")
+	testRepo := testutil.NewTestGitRepository(t, "perf-test")
 
 	// Create many files and directories
 	for i := 0; i < 100; i++ {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/keisukeshimizu/hatcher/internal/editor"
 	"github.com/keisukeshimizu/hatcher/internal/git"
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -107,7 +107,7 @@ func (m *MockEditorDetector) GetEditorByName(name string) editor.Editor {
 
 func TestMover_MoveToWorktree(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "mover-test")
+	testRepo := testutil.NewTestGitRepository(t, "mover-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -284,7 +284,7 @@ func TestMover_MoveToWorktree(t *testing.T) {
 
 func TestMover_CreateAndMove(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "create-move-test")
+	testRepo := testutil.NewTestGitRepository(t, "create-move-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 

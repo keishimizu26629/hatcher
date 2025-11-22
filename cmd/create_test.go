@@ -6,20 +6,20 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateCommand(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 
 	// Create CLI test helper
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Create mock environment
-	mockEnv := helpers.NewMockEnvironment(t)
+	mockEnv := testutil.NewMockEnvironment(t)
 	defer mockEnv.Cleanup()
 
 	// Change to the repository directory
@@ -122,7 +122,7 @@ func TestCreateCommand(t *testing.T) {
 }
 
 func TestCreateCommandHelp(t *testing.T) {
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Execute help command
 	err := cliHelper.ExecuteCommand(rootCmd, "create", "--help")
@@ -138,13 +138,13 @@ func TestCreateCommandHelp(t *testing.T) {
 
 func TestCreateCommandFlags(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 
 	// Create CLI test helper
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Create mock environment
-	mockEnv := helpers.NewMockEnvironment(t)
+	mockEnv := testutil.NewMockEnvironment(t)
 	defer mockEnv.Cleanup()
 
 	// Change to the repository directory
@@ -178,13 +178,13 @@ func TestCreateCommandFlags(t *testing.T) {
 
 func TestCreateCommandEdgeCase(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 
 	// Create CLI test helper
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Create mock environment
-	mockEnv := helpers.NewMockEnvironment(t)
+	mockEnv := testutil.NewMockEnvironment(t)
 	defer mockEnv.Cleanup()
 
 	// Change to the repository directory
@@ -226,7 +226,7 @@ func TestCreateCommandEdgeCase(t *testing.T) {
 
 func TestCreateCommandIntegration(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "integration-test")
+	testRepo := testutil.NewTestGitRepository(t, "integration-test")
 
 	// Create some test files that might be auto-copied
 	testRepo.CreateFile(".cursorrules", "# Cursor rules")
@@ -236,10 +236,10 @@ func TestCreateCommandIntegration(t *testing.T) {
 	testRepo.CommitAll("Add test files")
 
 	// Create CLI test helper
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Create mock environment
-	mockEnv := helpers.NewMockEnvironment(t)
+	mockEnv := testutil.NewMockEnvironment(t)
 	defer mockEnv.Cleanup()
 
 	// Change to the repository directory

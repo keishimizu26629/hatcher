@@ -1,4 +1,4 @@
-package cmd
+package integration
 
 import (
 	"encoding/json"
@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestListCommand_Integration(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "list-integration-test")
+	testRepo := testutil.NewTestGitRepository(t, "list-integration-test")
 
 	// Change to test repository directory
 	originalDir, err := os.Getwd()
@@ -29,7 +29,7 @@ func TestListCommand_Integration(t *testing.T) {
 
 	t.Run("list empty worktrees", func(t *testing.T) {
 		// Execute list command
-		output, err := helpers.ExecuteCommand(listCmd, []string{})
+		output, err := testutil.ExecuteCommand(listCmd, []string{})
 		require.NoError(t, err)
 
 		// Should show main repository
@@ -49,7 +49,7 @@ func TestListCommand_Integration(t *testing.T) {
 		testRepo.CreateWorktree(worktreePath2, branchName2)
 
 		// Execute list command
-		output, err := helpers.ExecuteCommand(listCmd, []string{})
+		output, err := testutil.ExecuteCommand(listCmd, []string{})
 		require.NoError(t, err)
 
 		// Should show both worktrees
@@ -69,7 +69,7 @@ func TestListCommand_Integration(t *testing.T) {
 		testRepo.CreateWorktree(nonHatcherPath, nonHatcherBranch)
 
 		// Execute list command with --all flag
-		output, err := helpers.ExecuteCommand(listCmd, []string{"--all"})
+		output, err := testutil.ExecuteCommand(listCmd, []string{"--all"})
 		require.NoError(t, err)
 
 		// Should show both types of worktrees
@@ -87,7 +87,7 @@ func TestListCommand_Integration(t *testing.T) {
 		testRepo.CreateWorktree(worktreePath, branchName)
 
 		// Execute list command with --paths flag
-		output, err := helpers.ExecuteCommand(listCmd, []string{"--paths"})
+		output, err := testutil.ExecuteCommand(listCmd, []string{"--paths"})
 		require.NoError(t, err)
 
 		// Should show full paths
@@ -103,7 +103,7 @@ func TestListCommand_Integration(t *testing.T) {
 		testRepo.CreateWorktree(worktreePath, branchName)
 
 		// Execute list command with --status flag
-		output, err := helpers.ExecuteCommand(listCmd, []string{"--status"})
+		output, err := testutil.ExecuteCommand(listCmd, []string{"--status"})
 		require.NoError(t, err)
 
 		// Should show status information
@@ -119,7 +119,7 @@ func TestListCommand_Integration(t *testing.T) {
 		testRepo.CreateWorktree(worktreePath, branchName)
 
 		// Execute list command with JSON format
-		output, err := helpers.ExecuteCommand(listCmd, []string{"--format", "json"})
+		output, err := testutil.ExecuteCommand(listCmd, []string{"--format", "json"})
 		require.NoError(t, err)
 
 		// Should be valid JSON
@@ -140,7 +140,7 @@ func TestListCommand_Integration(t *testing.T) {
 		testRepo.CreateWorktree(worktreePath, branchName)
 
 		// Execute list command with simple format
-		output, err := helpers.ExecuteCommand(listCmd, []string{"--format", "simple"})
+		output, err := testutil.ExecuteCommand(listCmd, []string{"--format", "simple"})
 		require.NoError(t, err)
 
 		// Should show simple list
@@ -160,7 +160,7 @@ func TestListCommand_Integration(t *testing.T) {
 		testRepo.CreateWorktree(bugfixPath, bugfixBranch)
 
 		// Execute list command with feature filter
-		output, err := helpers.ExecuteCommand(listCmd, []string{"--filter", "feature/*"})
+		output, err := testutil.ExecuteCommand(listCmd, []string{"--filter", "feature/*"})
 		require.NoError(t, err)
 
 		// Should show only feature branches
@@ -170,13 +170,13 @@ func TestListCommand_Integration(t *testing.T) {
 
 	t.Run("command aliases", func(t *testing.T) {
 		// Test 'ls' alias
-		output, err := helpers.ExecuteCommandByName("ls", []string{})
+		output, err := testutil.ExecuteCommandByName("ls", []string{})
 		if err == nil { // Only test if alias is properly implemented
 			assert.Contains(t, output, "BRANCH")
 		}
 
 		// Test 'show' alias
-		output, err = helpers.ExecuteCommandByName("show", []string{})
+		output, err = testutil.ExecuteCommandByName("show", []string{})
 		if err == nil { // Only test if alias is properly implemented
 			assert.Contains(t, output, "BRANCH")
 		}
@@ -190,7 +190,7 @@ func TestListCommand_Integration(t *testing.T) {
 		testRepo.CreateWorktree(worktreePath, branchName)
 
 		// Execute list command with verbose flag
-		output, err := helpers.ExecuteCommand(listCmd, []string{"--verbose"})
+		output, err := testutil.ExecuteCommand(listCmd, []string{"--verbose"})
 		require.NoError(t, err)
 
 		// Should show worktree information
@@ -200,7 +200,7 @@ func TestListCommand_Integration(t *testing.T) {
 
 func TestListCommand_EdgeCases(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "list-edge-cases-test")
+	testRepo := testutil.NewTestGitRepository(t, "list-edge-cases-test")
 
 	// Change to test repository directory
 	originalDir, err := os.Getwd()
@@ -215,7 +215,7 @@ func TestListCommand_EdgeCases(t *testing.T) {
 
 	t.Run("invalid output format", func(t *testing.T) {
 		// Execute list command with invalid format
-		output, err := helpers.ExecuteCommand(listCmd, []string{"--format", "invalid"})
+		output, err := testutil.ExecuteCommand(listCmd, []string{"--format", "invalid"})
 		require.NoError(t, err) // Should default to table format
 
 		// Should show table format
@@ -230,7 +230,7 @@ func TestListCommand_EdgeCases(t *testing.T) {
 		testRepo.CreateWorktree(worktreePath, branchName)
 
 		// Execute list command with empty filter
-		output, err := helpers.ExecuteCommand(listCmd, []string{"--filter", ""})
+		output, err := testutil.ExecuteCommand(listCmd, []string{"--filter", ""})
 		require.NoError(t, err)
 
 		// Should show all worktrees (no filtering)
@@ -244,7 +244,7 @@ func TestListCommand_EdgeCases(t *testing.T) {
 		require.NoError(t, err)
 
 		// Execute list command
-		output, err := helpers.ExecuteCommand(listCmd, []string{})
+		output, err := testutil.ExecuteCommand(listCmd, []string{})
 		assert.Error(t, err)
 		assert.Contains(t, strings.ToLower(output), "git")
 	})
@@ -261,7 +261,7 @@ func TestListCommand_EdgeCases(t *testing.T) {
 		testRepo.CreateWorktree(worktreePath, longBranchName)
 
 		// Execute list command
-		output, err := helpers.ExecuteCommand(listCmd, []string{})
+		output, err := testutil.ExecuteCommand(listCmd, []string{})
 		require.NoError(t, err)
 
 		// Should handle long names gracefully
@@ -276,7 +276,7 @@ func TestListCommand_EdgeCases(t *testing.T) {
 		testRepo.CreateWorktree(worktreePath, specialBranch)
 
 		// Execute list command
-		output, err := helpers.ExecuteCommand(listCmd, []string{})
+		output, err := testutil.ExecuteCommand(listCmd, []string{})
 		require.NoError(t, err)
 
 		// Should handle special characters

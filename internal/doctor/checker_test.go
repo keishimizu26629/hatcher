@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestChecker_CheckSystem(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "doctor-test")
+	testRepo := testutil.NewTestGitRepository(t, "doctor-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -72,7 +72,7 @@ func TestChecker_CheckGitInstallation(t *testing.T) {
 
 func TestChecker_CheckGitRepository(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "git-repo-test")
+	testRepo := testutil.NewTestGitRepository(t, "git-repo-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -104,7 +104,7 @@ func TestChecker_CheckGitRepository(t *testing.T) {
 
 func TestChecker_CheckWorktrees(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "worktrees-test")
+	testRepo := testutil.NewTestGitRepository(t, "worktrees-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -165,7 +165,7 @@ func TestChecker_CheckEditors(t *testing.T) {
 
 func TestChecker_CheckConfiguration(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "config-test")
+	testRepo := testutil.NewTestGitRepository(t, "config-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -206,7 +206,7 @@ func TestChecker_CheckConfiguration(t *testing.T) {
 
 func TestChecker_CheckPermissions(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "permissions-test")
+	testRepo := testutil.NewTestGitRepository(t, "permissions-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 

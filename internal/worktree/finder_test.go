@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestWorktreeFinder_FindWorktree(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "finder-test")
+	testRepo := testutil.NewTestGitRepository(t, "finder-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -101,7 +101,7 @@ func TestWorktreeFinder_FindWorktree(t *testing.T) {
 
 func TestWorktreeFinder_ListHatcherWorktrees(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "list-test")
+	testRepo := testutil.NewTestGitRepository(t, "list-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -167,7 +167,7 @@ func TestWorktreeFinder_ListHatcherWorktrees(t *testing.T) {
 
 	t.Run("empty repository", func(t *testing.T) {
 		// Create empty repository
-		emptyRepo := helpers.NewTestGitRepository(t, "empty-test")
+		emptyRepo := testutil.NewTestGitRepository(t, "empty-test")
 		emptyGitRepo, err := git.NewRepositoryFromPath(emptyRepo.RepoDir)
 		require.NoError(t, err)
 
@@ -195,7 +195,7 @@ func TestWorktreeFinder_ListHatcherWorktrees(t *testing.T) {
 
 func TestWorktreeFinder_GetWorktreeInfo(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "info-test")
+	testRepo := testutil.NewTestGitRepository(t, "info-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 

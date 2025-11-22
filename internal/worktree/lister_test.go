@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLister_ListWorktrees(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "lister-test")
+	testRepo := testutil.NewTestGitRepository(t, "lister-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -197,7 +197,7 @@ func TestLister_ListWorktrees(t *testing.T) {
 
 func TestLister_GetWorktreeStatus(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "status-test")
+	testRepo := testutil.NewTestGitRepository(t, "status-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -231,7 +231,7 @@ func TestLister_GetWorktreeStatus(t *testing.T) {
 
 func TestLister_FilterWorktrees(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "filter-test")
+	testRepo := testutil.NewTestGitRepository(t, "filter-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 

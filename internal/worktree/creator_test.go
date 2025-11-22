@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -185,7 +185,7 @@ func TestIsHatcherWorktree(t *testing.T) {
 
 func TestCreator_Create(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 

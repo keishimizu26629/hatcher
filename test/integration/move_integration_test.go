@@ -1,24 +1,24 @@
-package cmd
+package integration
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMoveCommandIntegration(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "move-integration")
+	testRepo := testutil.NewTestGitRepository(t, "move-integration")
 
 	// Create CLI test helper
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Create mock environment
-	mockEnv := helpers.NewMockEnvironment(t)
+	mockEnv := testutil.NewMockEnvironment(t)
 	defer mockEnv.Cleanup()
 
 	// Change to the repository directory
@@ -99,7 +99,7 @@ func TestMoveCommandIntegration(t *testing.T) {
 }
 
 func TestMoveCommandHelp(t *testing.T) {
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Execute help command
 	err := cliHelper.ExecuteCommand(rootCmd, "move", "--help")
@@ -115,13 +115,13 @@ func TestMoveCommandHelp(t *testing.T) {
 
 func TestMoveCommandFlags(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "move-flags")
+	testRepo := testutil.NewTestGitRepository(t, "move-flags")
 
 	// Create CLI test helper
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Create mock environment
-	mockEnv := helpers.NewMockEnvironment(t)
+	mockEnv := testutil.NewMockEnvironment(t)
 	defer mockEnv.Cleanup()
 
 	// Change to the repository directory
@@ -159,13 +159,13 @@ func TestMoveCommandFlags(t *testing.T) {
 
 func TestMoveCommandEdgeCases(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "move-edge-cases")
+	testRepo := testutil.NewTestGitRepository(t, "move-edge-cases")
 
 	// Create CLI test helper
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Create mock environment
-	mockEnv := helpers.NewMockEnvironment(t)
+	mockEnv := testutil.NewMockEnvironment(t)
 	defer mockEnv.Cleanup()
 
 	// Change to the repository directory
@@ -232,7 +232,7 @@ func TestMoveCommandEdgeCases(t *testing.T) {
 
 func TestMoveCommandWorkflow(t *testing.T) {
 	// Create test repository with realistic setup
-	testRepo := helpers.NewTestGitRepository(t, "move-workflow")
+	testRepo := testutil.NewTestGitRepository(t, "move-workflow")
 
 	// Create some files
 	testRepo.CreateFile("README.md", "# Move Workflow Test")
@@ -240,10 +240,10 @@ func TestMoveCommandWorkflow(t *testing.T) {
 	testRepo.CommitAll("Initial commit")
 
 	// Create CLI test helper
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Create mock environment
-	mockEnv := helpers.NewMockEnvironment(t)
+	mockEnv := testutil.NewMockEnvironment(t)
 	defer mockEnv.Cleanup()
 
 	// Change to the repository directory

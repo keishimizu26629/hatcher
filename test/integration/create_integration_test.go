@@ -1,18 +1,18 @@
-package cmd
+package integration
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateCommandWithAutoCopy(t *testing.T) {
 	// Create test repository with auto-copy files
-	testRepo := helpers.NewTestGitRepository(t, "autocopy-integration")
+	testRepo := testutil.NewTestGitRepository(t, "autocopy-integration")
 
 	// Create AI and development files
 	testRepo.CreateDirectory(".ai")
@@ -56,10 +56,10 @@ func TestCreateCommandWithAutoCopy(t *testing.T) {
 	testRepo.CommitAll("Add auto-copy files and configuration")
 
 	// Create CLI test helper
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Create mock environment
-	mockEnv := helpers.NewMockEnvironment(t)
+	mockEnv := testutil.NewMockEnvironment(t)
 	defer mockEnv.Cleanup()
 
 	// Change to the repository directory
@@ -181,13 +181,13 @@ func TestCreateCommandWithAutoCopy(t *testing.T) {
 
 func TestCreateCommandAutoCopyEdgeCases(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "autocopy-edge-cases")
+	testRepo := testutil.NewTestGitRepository(t, "autocopy-edge-cases")
 
 	// Create CLI test helper
-	cliHelper := helpers.NewCLITestHelper(t)
+	cliHelper := testutil.NewCLITestHelper(t)
 
 	// Create mock environment
-	mockEnv := helpers.NewMockEnvironment(t)
+	mockEnv := testutil.NewMockEnvironment(t)
 	defer mockEnv.Cleanup()
 
 	// Change to the repository directory

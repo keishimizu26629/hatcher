@@ -1,4 +1,4 @@
-package cmd
+package integration
 
 import (
 	"encoding/json"
@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDoctorCommand_Integration(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "doctor-integration-test")
+	testRepo := testutil.NewTestGitRepository(t, "doctor-integration-test")
 
 	// Change to test repository directory
 	originalDir, err := os.Getwd()
@@ -28,7 +28,7 @@ func TestDoctorCommand_Integration(t *testing.T) {
 
 	t.Run("basic doctor check", func(t *testing.T) {
 		// Execute doctor command
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{})
 		// Note: doctor command may exit with non-zero code for warnings/failures
 		// We check the output regardless of exit code
 
@@ -41,7 +41,7 @@ func TestDoctorCommand_Integration(t *testing.T) {
 
 	t.Run("JSON output format", func(t *testing.T) {
 		// Execute doctor command with JSON format
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{"--format", "json"})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{"--format", "json"})
 		// Check output regardless of exit code
 
 		// Should be valid JSON
@@ -56,7 +56,7 @@ func TestDoctorCommand_Integration(t *testing.T) {
 
 	t.Run("simple output format", func(t *testing.T) {
 		// Execute doctor command with simple format
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{"--format", "simple"})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{"--format", "simple"})
 		// Check output regardless of exit code
 
 		// Should show simple format with icons
@@ -67,7 +67,7 @@ func TestDoctorCommand_Integration(t *testing.T) {
 
 	t.Run("simple flag", func(t *testing.T) {
 		// Execute doctor command with --simple flag
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{"--simple"})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{"--simple"})
 		// Check output regardless of exit code
 
 		// Should show simple format
@@ -79,19 +79,19 @@ func TestDoctorCommand_Integration(t *testing.T) {
 
 	t.Run("command aliases", func(t *testing.T) {
 		// Test 'check' alias
-		output, err := helpers.ExecuteCommandByName("check", []string{})
+		output, err := testutil.ExecuteCommandByName("check", []string{})
 		if err == nil { // Only test if alias is properly implemented
 			assert.Contains(t, output, "Git Installation")
 		}
 
 		// Test 'validate' alias
-		output, err = helpers.ExecuteCommandByName("validate", []string{})
+		output, err = testutil.ExecuteCommandByName("validate", []string{})
 		if err == nil { // Only test if alias is properly implemented
 			assert.Contains(t, output, "Git Installation")
 		}
 
 		// Test 'diagnose' alias
-		output, err = helpers.ExecuteCommandByName("diagnose", []string{})
+		output, err = testutil.ExecuteCommandByName("diagnose", []string{})
 		if err == nil { // Only test if alias is properly implemented
 			assert.Contains(t, output, "Git Installation")
 		}
@@ -99,7 +99,7 @@ func TestDoctorCommand_Integration(t *testing.T) {
 
 	t.Run("verbose output", func(t *testing.T) {
 		// Execute doctor command with verbose flag
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{"--verbose"})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{"--verbose"})
 		// Check output regardless of exit code
 
 		// Should show diagnostic information
@@ -124,7 +124,7 @@ func TestDoctorCommand_NonGitRepository(t *testing.T) {
 
 	t.Run("doctor in non-git directory", func(t *testing.T) {
 		// Execute doctor command
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{})
 		// Should still work, but may show warnings about Git repository
 
 		// Should still show Git installation check
@@ -139,7 +139,7 @@ func TestDoctorCommand_NonGitRepository(t *testing.T) {
 
 	t.Run("JSON output in non-git directory", func(t *testing.T) {
 		// Execute doctor command with JSON format
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{"--format", "json"})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{"--format", "json"})
 
 		// Should still produce valid JSON
 		var result map[string]interface{}
@@ -154,7 +154,7 @@ func TestDoctorCommand_NonGitRepository(t *testing.T) {
 
 func TestDoctorCommand_EdgeCases(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "doctor-edge-cases-test")
+	testRepo := testutil.NewTestGitRepository(t, "doctor-edge-cases-test")
 
 	// Change to test repository directory
 	originalDir, err := os.Getwd()
@@ -169,7 +169,7 @@ func TestDoctorCommand_EdgeCases(t *testing.T) {
 
 	t.Run("invalid output format", func(t *testing.T) {
 		// Execute doctor command with invalid format
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{"--format", "invalid"})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{"--format", "invalid"})
 		// Should default to table format
 
 		// Should show table format
@@ -179,7 +179,7 @@ func TestDoctorCommand_EdgeCases(t *testing.T) {
 
 	t.Run("conflicting format flags", func(t *testing.T) {
 		// Execute doctor command with both format and simple flags
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{"--format", "json", "--simple"})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{"--format", "json", "--simple"})
 		// JSON format should take precedence
 
 		// Should be valid JSON (not simple format)
@@ -190,7 +190,7 @@ func TestDoctorCommand_EdgeCases(t *testing.T) {
 
 	t.Run("check system health indicators", func(t *testing.T) {
 		// Execute doctor command
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{})
 
 		// Should show summary information
 		assert.Contains(t, output, "Summary:")
@@ -205,7 +205,7 @@ func TestDoctorCommand_EdgeCases(t *testing.T) {
 
 	t.Run("check individual diagnostic components", func(t *testing.T) {
 		// Execute doctor command
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{})
 
 		// Should check Git installation
 		assert.Contains(t, output, "Git Installation")
@@ -225,7 +225,7 @@ func TestDoctorCommand_EdgeCases(t *testing.T) {
 
 	t.Run("check status indicators", func(t *testing.T) {
 		// Execute doctor command with simple format to see icons
-		output, err := helpers.ExecuteCommand(doctorCmd, []string{"--simple"})
+		output, err := testutil.ExecuteCommand(doctorCmd, []string{"--simple"})
 
 		// Should contain status indicators
 		hasStatusIndicators := strings.Contains(output, "✅") ||

@@ -1,4 +1,4 @@
-package cmd
+package integration
 
 import (
 	"encoding/json"
@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestConfigCommand_Integration(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "config-integration-test")
+	testRepo := testutil.NewTestGitRepository(t, "config-integration-test")
 
 	// Change to test repository directory
 	originalDir, err := os.Getwd()
@@ -29,7 +29,7 @@ func TestConfigCommand_Integration(t *testing.T) {
 
 	t.Run("config init project", func(t *testing.T) {
 		// Execute config init command
-		output, err := helpers.ExecuteCommand(configInitCmd, []string{})
+		output, err := testutil.ExecuteCommand(configInitCmd, []string{})
 		require.NoError(t, err)
 
 		// Should show success message
@@ -60,7 +60,7 @@ func TestConfigCommand_Integration(t *testing.T) {
 		os.Setenv("HOME", tempHome)
 
 		// Execute config init --global command
-		output, err := helpers.ExecuteCommand(configInitCmd, []string{"--global"})
+		output, err := testutil.ExecuteCommand(configInitCmd, []string{"--global"})
 		require.NoError(t, err)
 
 		// Should show success message
@@ -79,12 +79,12 @@ func TestConfigCommand_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Try init without force (should fail)
-		output, err := helpers.ExecuteCommand(configInitCmd, []string{})
+		output, err := testutil.ExecuteCommand(configInitCmd, []string{})
 		assert.Error(t, err)
 		assert.Contains(t, output, "already exists")
 
 		// Try init with force (should succeed)
-		output, err = helpers.ExecuteCommand(configInitCmd, []string{"--force"})
+		output, err = testutil.ExecuteCommand(configInitCmd, []string{"--force"})
 		require.NoError(t, err)
 		assert.Contains(t, output, "Initialized project configuration")
 	})
@@ -106,7 +106,7 @@ func TestConfigCommand_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Execute config show command
-		output, err := helpers.ExecuteCommand(configShowCmd, []string{})
+		output, err := testutil.ExecuteCommand(configShowCmd, []string{})
 		require.NoError(t, err)
 
 		// Should show configuration
@@ -118,7 +118,7 @@ func TestConfigCommand_Integration(t *testing.T) {
 
 	t.Run("config show with paths", func(t *testing.T) {
 		// Execute config show --paths command
-		output, err := helpers.ExecuteCommand(configShowCmd, []string{"--paths"})
+		output, err := testutil.ExecuteCommand(configShowCmd, []string{"--paths"})
 		require.NoError(t, err)
 
 		// Should show config file paths
@@ -129,7 +129,7 @@ func TestConfigCommand_Integration(t *testing.T) {
 
 	t.Run("config show JSON format", func(t *testing.T) {
 		// Execute config show --format json command
-		output, err := helpers.ExecuteCommand(configShowCmd, []string{"--format", "json"})
+		output, err := testutil.ExecuteCommand(configShowCmd, []string{"--format", "json"})
 		require.NoError(t, err)
 
 		// Should be valid JSON
@@ -160,7 +160,7 @@ func TestConfigCommand_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Execute config validate command
-		output, err := helpers.ExecuteCommand(configValidateCmd, []string{})
+		output, err := testutil.ExecuteCommand(configValidateCmd, []string{})
 		require.NoError(t, err)
 
 		// Should show validation success
@@ -184,7 +184,7 @@ func TestConfigCommand_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Execute config validate command
-		output, err := helpers.ExecuteCommand(configValidateCmd, []string{})
+		output, err := testutil.ExecuteCommand(configValidateCmd, []string{})
 		assert.Error(t, err)
 
 		// Should show validation errors
@@ -199,7 +199,7 @@ func TestConfigCommand_Integration(t *testing.T) {
 		os.Setenv("EDITOR", "echo")
 
 		// Execute config edit command
-		output, err := helpers.ExecuteCommand(configEditCmd, []string{})
+		output, err := testutil.ExecuteCommand(configEditCmd, []string{})
 		require.NoError(t, err)
 
 		// Should show editor information
@@ -210,7 +210,7 @@ func TestConfigCommand_Integration(t *testing.T) {
 
 	t.Run("config command aliases", func(t *testing.T) {
 		// Test 'cfg' alias
-		output, err := helpers.ExecuteCommandByName("cfg", []string{"show"})
+		output, err := testutil.ExecuteCommandByName("cfg", []string{"show"})
 		if err == nil { // Only test if alias is properly implemented
 			assert.Contains(t, output, "Configuration")
 		}
@@ -219,7 +219,7 @@ func TestConfigCommand_Integration(t *testing.T) {
 
 func TestConfigCommand_EdgeCases(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "config-edge-cases-test")
+	testRepo := testutil.NewTestGitRepository(t, "config-edge-cases-test")
 
 	// Change to test repository directory
 	originalDir, err := os.Getwd()
@@ -234,7 +234,7 @@ func TestConfigCommand_EdgeCases(t *testing.T) {
 
 	t.Run("config show with no config", func(t *testing.T) {
 		// Execute config show with no config files
-		output, err := helpers.ExecuteCommand(configShowCmd, []string{})
+		output, err := testutil.ExecuteCommand(configShowCmd, []string{})
 		require.NoError(t, err)
 
 		// Should show default configuration
@@ -244,7 +244,7 @@ func TestConfigCommand_EdgeCases(t *testing.T) {
 
 	t.Run("config validate with no config", func(t *testing.T) {
 		// Execute config validate with no config files
-		output, err := helpers.ExecuteCommand(configValidateCmd, []string{})
+		output, err := testutil.ExecuteCommand(configValidateCmd, []string{})
 		require.NoError(t, err)
 
 		// Should validate default configuration
@@ -253,7 +253,7 @@ func TestConfigCommand_EdgeCases(t *testing.T) {
 
 	t.Run("config init with invalid format", func(t *testing.T) {
 		// Execute config init with invalid format
-		output, err := helpers.ExecuteCommand(configInitCmd, []string{"--format", "invalid"})
+		output, err := testutil.ExecuteCommand(configInitCmd, []string{"--format", "invalid"})
 		// Should still work (format is not used in init currently)
 		require.NoError(t, err)
 		assert.Contains(t, output, "Initialized")
@@ -261,7 +261,7 @@ func TestConfigCommand_EdgeCases(t *testing.T) {
 
 	t.Run("config show with invalid format", func(t *testing.T) {
 		// Execute config show with invalid format
-		output, err := helpers.ExecuteCommand(configShowCmd, []string{"--format", "invalid"})
+		output, err := testutil.ExecuteCommand(configShowCmd, []string{"--format", "invalid"})
 		require.NoError(t, err)
 
 		// Should default to table format
@@ -270,7 +270,7 @@ func TestConfigCommand_EdgeCases(t *testing.T) {
 
 	t.Run("config edit with custom editor", func(t *testing.T) {
 		// Execute config edit with custom editor
-		output, err := helpers.ExecuteCommand(configEditCmd, []string{"--editor", "vim"})
+		output, err := testutil.ExecuteCommand(configEditCmd, []string{"--editor", "vim"})
 		require.NoError(t, err)
 
 		// Should use specified editor
@@ -288,7 +288,7 @@ func TestConfigCommand_EdgeCases(t *testing.T) {
 		require.NoError(t, err)
 
 		// Execute config validate --fix command
-		output, err := helpers.ExecuteCommand(configValidateCmd, []string{"--fix"})
+		output, err := testutil.ExecuteCommand(configValidateCmd, []string{"--fix"})
 		require.NoError(t, err)
 
 		// Should mention fix functionality
@@ -308,7 +308,7 @@ func TestConfigCommand_EdgeCases(t *testing.T) {
 		os.Setenv("HATCHER_VERBOSE", "true")
 
 		// Execute config show command
-		output, err := helpers.ExecuteCommand(configShowCmd, []string{})
+		output, err := testutil.ExecuteCommand(configShowCmd, []string{})
 		require.NoError(t, err)
 
 		// Should show environment variable overrides

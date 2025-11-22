@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/keisukeshimizu/hatcher/internal/testutil"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"gopkg.in/yaml.v3"
 )
 

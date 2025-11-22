@@ -5,14 +5,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestAutoCopier_CopyFiles(t *testing.T) {
 	// Create test repository with files to copy
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 
 	// Create test files and directories
 	testRepo.CreateDirectory(".ai")
@@ -232,7 +232,7 @@ func TestAutoCopier_CopyFiles(t *testing.T) {
 
 func TestAutoCopier_ProcessGlobPattern(t *testing.T) {
 	// Create test repository with files
-	testRepo := helpers.NewTestGitRepository(t, "glob-test")
+	testRepo := testutil.NewTestGitRepository(t, "glob-test")
 
 	// Create test files matching glob patterns
 	testRepo.CreateFile("config.json", `{"test": true}`)
@@ -306,7 +306,7 @@ func TestAutoCopier_ProcessGlobPattern(t *testing.T) {
 }
 
 func TestAutoCopier_UpdateGitignore(t *testing.T) {
-	testRepo := helpers.NewTestGitRepository(t, "gitignore-test")
+	testRepo := testutil.NewTestGitRepository(t, "gitignore-test")
 
 	t.Run("create new gitignore", func(t *testing.T) {
 		copier := NewLegacyAutoCopier()

@@ -10,15 +10,15 @@ import (
 	"time"
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
-	"github.com/keisukeshimizu/hatcher/internal/testutil"
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestParallelCopier_Run(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "parallel-copier-test")
+	testRepo := testutil.NewTestGitRepository(t, "parallel-copier-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -291,7 +291,7 @@ func TestParallelCopier_Run(t *testing.T) {
 }
 
 func TestParallelCopier_WorkerPool(t *testing.T) {
-	testRepo := helpers.NewTestGitRepository(t, "worker-pool-test")
+	testRepo := testutil.NewTestGitRepository(t, "worker-pool-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 

@@ -1,4 +1,4 @@
-package security
+package security_test
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/keisukeshimizu/hatcher/internal/autocopy"
 	"github.com/keisukeshimizu/hatcher/internal/git"
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +17,7 @@ import (
 // TestPathTraversalPrevention tests prevention of path traversal attacks
 func TestPathTraversalPrevention(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "security-test")
+	testRepo := testutil.NewTestGitRepository(t, "security-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -193,7 +193,7 @@ func TestInputValidation(t *testing.T) {
 // TestFilePermissions tests file permission handling
 func TestFilePermissions(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "permissions-test")
+	testRepo := testutil.NewTestGitRepository(t, "permissions-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -274,7 +274,7 @@ func TestResourceLimits(t *testing.T) {
 	}
 
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "resource-test")
+	testRepo := testutil.NewTestGitRepository(t, "resource-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 

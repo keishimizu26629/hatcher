@@ -5,14 +5,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewRepository(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 
 	// Change to the repository directory
 	originalWd, err := os.Getwd()
@@ -41,7 +41,7 @@ func TestNewRepository(t *testing.T) {
 
 func TestNewRepositoryFromPath(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 
 	// Test NewRepositoryFromPath
 	repo, err := NewRepositoryFromPath(testRepo.RepoDir)
@@ -76,7 +76,7 @@ func TestNewRepository_NotInGitRepo(t *testing.T) {
 
 func TestBranchExists(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 	repo, err := NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -96,7 +96,7 @@ func TestBranchExists(t *testing.T) {
 
 func TestCreateBranch(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 	repo, err := NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -118,7 +118,7 @@ func TestCreateBranch(t *testing.T) {
 
 func TestDeleteBranch(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 	repo, err := NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -148,7 +148,7 @@ func TestDeleteBranch(t *testing.T) {
 
 func TestCreateWorktree(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 	repo, err := NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -170,7 +170,7 @@ func TestCreateWorktree(t *testing.T) {
 
 func TestRemoveWorktree(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 	repo, err := NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -192,7 +192,7 @@ func TestRemoveWorktree(t *testing.T) {
 
 func TestListWorktrees(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 	repo, err := NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -236,7 +236,7 @@ func TestListWorktrees(t *testing.T) {
 
 func TestUpdateGitignore(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 	repo, err := NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -261,7 +261,7 @@ func TestUpdateGitignore(t *testing.T) {
 
 func TestGetWorktreePath(t *testing.T) {
 	// Create a test Git repository
-	testRepo := helpers.NewTestGitRepository(t, "test-project")
+	testRepo := testutil.NewTestGitRepository(t, "test-project")
 	repo, err := NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 

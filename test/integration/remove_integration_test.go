@@ -1,4 +1,4 @@
-package cmd
+package integration
 
 import (
 	"os"
@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRemoveCommand_Integration(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "remove-integration-test")
+	testRepo := testutil.NewTestGitRepository(t, "remove-integration-test")
 
 	// Change to test repository directory
 	originalDir, err := os.Getwd()
@@ -37,7 +37,7 @@ func TestRemoveCommand_Integration(t *testing.T) {
 		assert.True(t, testRepo.BranchExists(branchName))
 
 		// Execute remove command
-		output, err := helpers.ExecuteCommand(removeCmd, []string{branchName, "--yes"})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{branchName, "--yes"})
 		require.NoError(t, err)
 
 		// Verify output
@@ -62,7 +62,7 @@ func TestRemoveCommand_Integration(t *testing.T) {
 		assert.DirExists(t, worktreePath)
 
 		// Execute remove command with --branch flag
-		output, err := helpers.ExecuteCommand(removeCmd, []string{branchName, "--branch", "--yes"})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{branchName, "--branch", "--yes"})
 		require.NoError(t, err)
 
 		// Verify output
@@ -87,7 +87,7 @@ func TestRemoveCommand_Integration(t *testing.T) {
 		assert.DirExists(t, worktreePath)
 
 		// Execute remove command with --all flag
-		output, err := helpers.ExecuteCommand(removeCmd, []string{branchName, "--all", "--yes"})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{branchName, "--all", "--yes"})
 		require.NoError(t, err)
 
 		// Verify output
@@ -112,7 +112,7 @@ func TestRemoveCommand_Integration(t *testing.T) {
 		assert.DirExists(t, worktreePath)
 
 		// Execute remove command in dry run mode
-		output, err := helpers.ExecuteCommand(removeCmd, []string{branchName, "--branch", "--dry-run"})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{branchName, "--branch", "--dry-run"})
 		require.NoError(t, err)
 
 		// Verify output
@@ -127,7 +127,7 @@ func TestRemoveCommand_Integration(t *testing.T) {
 
 	t.Run("remove non-existent worktree", func(t *testing.T) {
 		// Try to remove non-existent worktree
-		output, err := helpers.ExecuteCommand(removeCmd, []string{"feature/non-existent", "--yes"})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{"feature/non-existent", "--yes"})
 		assert.Error(t, err)
 		assert.Contains(t, strings.ToLower(output), "not found")
 	})
@@ -137,7 +137,7 @@ func TestRemoveCommand_Integration(t *testing.T) {
 		currentBranch := strings.TrimSpace(testRepo.GetCurrentBranch())
 
 		// Try to remove main repository
-		output, err := helpers.ExecuteCommand(removeCmd, []string{currentBranch, "--yes"})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{currentBranch, "--yes"})
 		assert.Error(t, err)
 		assert.Contains(t, strings.ToLower(output), "main repository")
 	})
@@ -156,7 +156,7 @@ func TestRemoveCommand_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Execute remove command with --force flag
-		output, err := helpers.ExecuteCommand(removeCmd, []string{branchName, "--force", "--yes"})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{branchName, "--force", "--yes"})
 		require.NoError(t, err)
 
 		// Verify output
@@ -176,7 +176,7 @@ func TestRemoveCommand_Integration(t *testing.T) {
 		assert.DirExists(t, worktreePath)
 
 		// Test 'rm' alias
-		output, err := helpers.ExecuteCommandByName("rm", []string{branchName, "--yes"})
+		output, err := testutil.ExecuteCommandByName("rm", []string{branchName, "--yes"})
 		require.NoError(t, err)
 
 		// Verify output
@@ -196,7 +196,7 @@ func TestRemoveCommand_Integration(t *testing.T) {
 		assert.DirExists(t, worktreePath)
 
 		// Execute remove command with verbose flag
-		output, err := helpers.ExecuteCommand(removeCmd, []string{branchName, "--yes", "--verbose"})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{branchName, "--yes", "--verbose"})
 		require.NoError(t, err)
 
 		// Verify verbose output
@@ -210,7 +210,7 @@ func TestRemoveCommand_Integration(t *testing.T) {
 
 func TestRemoveCommand_Validation(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "remove-validation-test")
+	testRepo := testutil.NewTestGitRepository(t, "remove-validation-test")
 
 	// Change to test repository directory
 	originalDir, err := os.Getwd()
@@ -225,14 +225,14 @@ func TestRemoveCommand_Validation(t *testing.T) {
 
 	t.Run("missing branch name argument", func(t *testing.T) {
 		// Execute remove command without branch name
-		output, err := helpers.ExecuteCommand(removeCmd, []string{})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{})
 		assert.Error(t, err)
 		assert.Contains(t, strings.ToLower(output), "required")
 	})
 
 	t.Run("too many arguments", func(t *testing.T) {
 		// Execute remove command with too many arguments
-		output, err := helpers.ExecuteCommand(removeCmd, []string{"branch1", "branch2"})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{"branch1", "branch2"})
 		assert.Error(t, err)
 		assert.Contains(t, strings.ToLower(output), "accepts")
 	})
@@ -246,7 +246,7 @@ func TestRemoveCommand_Validation(t *testing.T) {
 		assert.DirExists(t, worktreePath)
 
 		// Test that --all implies --branch
-		output, err := helpers.ExecuteCommand(removeCmd, []string{branchName, "--all", "--dry-run"})
+		output, err := testutil.ExecuteCommand(removeCmd, []string{branchName, "--all", "--dry-run"})
 		require.NoError(t, err)
 
 		// Should show that both worktree and local branch will be removed

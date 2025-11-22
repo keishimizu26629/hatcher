@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestAutoCopyIntegration(t *testing.T) {
 	// Create test repository with realistic file structure
-	testRepo := helpers.NewTestGitRepository(t, "integration-test")
+	testRepo := testutil.NewTestGitRepository(t, "integration-test")
 
 	// Create AI and development files
 	testRepo.CreateDirectory(".ai")

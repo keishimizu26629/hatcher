@@ -10,14 +10,14 @@ import (
 	"time"
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
-	"github.com/keisukeshimizu/hatcher/test/helpers"
+	"github.com/keisukeshimizu/hatcher/test/testutil"
 	"github.com/stretchr/testify/require"
 )
 
 // BenchmarkParallelCopy benchmarks parallel copying performance
 func BenchmarkParallelCopy(b *testing.B) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(b, "perf-test")
+	testRepo := testutil.NewTestGitRepository(b, "perf-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(b, err)
 
@@ -72,7 +72,7 @@ func BenchmarkSequentialVsParallel(b *testing.B) {
 	for _, tc := range testCases {
 		b.Run(tc.name, func(b *testing.B) {
 			// Create test repository
-			testRepo := helpers.NewTestGitRepository(b, "perf-compare")
+			testRepo := testutil.NewTestGitRepository(b, "perf-compare")
 			repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 			require.NoError(b, err)
 
@@ -112,7 +112,7 @@ func BenchmarkSequentialVsParallel(b *testing.B) {
 // BenchmarkMemoryUsage tests memory usage during large file operations
 func BenchmarkMemoryUsage(b *testing.B) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(b, "memory-test")
+	testRepo := testutil.NewTestGitRepository(b, "memory-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(b, err)
 
@@ -175,7 +175,7 @@ func TestPerformanceRegression(t *testing.T) {
 	}
 
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "regression-test")
+	testRepo := testutil.NewTestGitRepository(t, "regression-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
@@ -244,7 +244,7 @@ func TestPerformanceRegression(t *testing.T) {
 // TestConcurrentSafety tests concurrent access safety
 func TestConcurrentSafety(t *testing.T) {
 	// Create test repository
-	testRepo := helpers.NewTestGitRepository(t, "concurrent-test")
+	testRepo := testutil.NewTestGitRepository(t, "concurrent-test")
 	repo, err := git.NewRepositoryFromPath(testRepo.RepoDir)
 	require.NoError(t, err)
 
