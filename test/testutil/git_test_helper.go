@@ -15,11 +15,11 @@ type TestGitRepository struct {
 	TempDir     string
 	RepoDir     string
 	ProjectName string
-	t           *testing.T
+	t           testing.TB
 }
 
 // NewTestGitRepository creates a new test Git repository
-func NewTestGitRepository(t *testing.T, projectName string) *TestGitRepository {
+func NewTestGitRepository(t testing.TB, projectName string) *TestGitRepository {
 	tempDir := t.TempDir()
 	repoDir := filepath.Join(tempDir, projectName)
 

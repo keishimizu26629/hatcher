@@ -1,7 +1,6 @@
 package worktree
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -160,7 +159,7 @@ func TestWorktreeFinder_ListHatcherWorktrees(t *testing.T) {
 		// Non-hatcher worktree should be excluded or marked as non-hatcher
 		for _, wt := range worktrees {
 			if wt.Path == nonHatcherPath {
-				assert.False(t, wt.IsHatcher)
+				assert.False(t, wt.IsHatcherManaged)
 			}
 		}
 	})
@@ -217,7 +216,7 @@ func TestWorktreeFinder_GetWorktreeInfo(t *testing.T) {
 		// Verify info
 		assert.Equal(t, branchName, info.Branch)
 		assert.Equal(t, worktreePath, info.Path)
-		assert.True(t, info.IsHatcher)
+		assert.True(t, info.IsHatcherManaged)
 		assert.NotEmpty(t, info.Head)
 	})
 
@@ -233,7 +232,7 @@ func TestWorktreeFinder_GetWorktreeInfo(t *testing.T) {
 		assert.NotEmpty(t, info.Branch)
 		assert.NotEmpty(t, info.Head)
 		// Main repository is considered hatcher-managed
-		assert.False(t, info.IsHatcher) // Main repo is not created by hatcher
+		assert.False(t, info.IsHatcherManaged) // Main repo is not created by hatcher
 	})
 
 	t.Run("get worktree info for non-existent path", func(t *testing.T) {

@@ -147,7 +147,8 @@ func TestGenerateWorktreePath(t *testing.T) {
 	expected := "/Users/test/projects/my-app-feature-user-auth"
 	result := GenerateWorktreePath(repoRoot, projectName, branchName)
 
-	assert.Equal(t, expected, result)
+	// Normalize paths for cross-platform comparison
+	assert.Equal(t, NormalizePath(expected), NormalizePath(result))
 }
 
 func TestIsHatcherWorktree(t *testing.T) {

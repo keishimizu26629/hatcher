@@ -6,6 +6,19 @@ import (
 	"strings"
 )
 
+// NormalizePath normalizes a path for cross-platform comparison
+func NormalizePath(path string) string {
+	// Convert to forward slashes for consistent comparison
+	normalized := filepath.ToSlash(path)
+	// Clean the path to remove redundant elements
+	return filepath.Clean(normalized)
+}
+
+// PathsEqual compares two paths for equality across platforms
+func PathsEqual(path1, path2 string) bool {
+	return NormalizePath(path1) == NormalizePath(path2)
+}
+
 // GenerateWorktreePath generates the full path for a worktree
 func GenerateWorktreePath(repoRoot, projectName, branchName string) string {
 	branchNameSafe := SanitizeBranchName(branchName)
