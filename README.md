@@ -66,9 +66,9 @@ curl -fsSL https://keishimizu26629.github.io/hatcher/uninstall.sh | bash
 Hatcher uses automated release workflows:
 
 - **Auto-release**: Commits to `main` branch automatically create new releases based on commit messages
-- **Semantic versioning**: 
+- **Semantic versioning**:
   - `feat:` or `✨` → Minor version bump (1.0.0 → 1.1.0)
-  - `fix:` or `🔧` → Patch version bump (1.0.0 → 1.0.1)  
+  - `fix:` or `🔧` → Patch version bump (1.0.0 → 1.0.1)
   - `BREAKING CHANGE:` or `!` → Major version bump (1.0.0 → 2.0.0)
 - **Binary distribution**: All platforms built and released automatically
 - **Install script updates**: GitHub Pages automatically updated

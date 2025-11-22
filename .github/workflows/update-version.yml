@@ -27,18 +27,6 @@ jobs:
           sed -i "s/Version: \"[^\"]*\"/Version: \"${VERSION#v}\"/" cmd/root.go
           echo "Updated version in cmd/root.go"
         fi
-        
-        # Update version in README.md installation examples
-        if [ -f "README.md" ]; then
-          # Update any version references in README
-          sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/$VERSION/g" README.md
-          echo "Updated version references in README.md"
-        fi
-        
-        # Update Homebrew Formula version
-        if [ -f "../homebrew-tap/hatcher.rb" ]; then
-          echo "Note: Homebrew formula should be updated separately"
-        fi
 
     - name: Check for changes
       id: changes
@@ -54,7 +42,7 @@ jobs:
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        
+
         git add .
         git commit -m "🔖 Update version to ${{ github.event.release.tag_name }}
 
