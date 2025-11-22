@@ -14,15 +14,15 @@ import (
 
 // MockEditor implements the Editor interface for testing
 type MockEditor struct {
-	name        string
-	command     string
-	priority    int
-	installed   bool
-	running     bool
-	openCalled  bool
-	quitCalled  bool
-	openError   error
-	quitError   error
+	name       string
+	command    string
+	priority   int
+	installed  bool
+	running    bool
+	openCalled bool
+	quitCalled bool
+	openError  error
+	quitError  error
 }
 
 func NewMockEditor(name, command string, priority int, installed bool) *MockEditor {
@@ -34,12 +34,12 @@ func NewMockEditor(name, command string, priority int, installed bool) *MockEdit
 	}
 }
 
-func (m *MockEditor) Name() string                        { return m.name }
-func (m *MockEditor) Command() string                     { return m.command }
-func (m *MockEditor) Priority() int                       { return m.priority }
-func (m *MockEditor) IsInstalled() bool                   { return m.installed }
-func (m *MockEditor) GetVersion() (string, error)         { return "1.0.0", nil }
-func (m *MockEditor) IsRunning() bool                     { return m.running }
+func (m *MockEditor) Name() string                { return m.name }
+func (m *MockEditor) Command() string             { return m.command }
+func (m *MockEditor) Priority() int               { return m.priority }
+func (m *MockEditor) IsInstalled() bool           { return m.installed }
+func (m *MockEditor) GetVersion() (string, error) { return "1.0.0", nil }
+func (m *MockEditor) IsRunning() bool             { return m.running }
 
 func (m *MockEditor) Open(path string) error {
 	m.openCalled = true

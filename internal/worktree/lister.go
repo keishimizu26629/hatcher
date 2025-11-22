@@ -19,16 +19,6 @@ type ListOptions struct {
 	ShowStatus bool // Show status information (clean/dirty)
 }
 
-// WorktreeInfo contains information about a single worktree
-type WorktreeInfo struct {
-	Branch           string                `json:"branch"`
-	Path             string                `json:"path"`
-	Head             string                `json:"head"`
-	Status           git.WorktreeStatus    `json:"status"`
-	IsMain           bool                  `json:"isMain"`
-	IsHatcherManaged bool                  `json:"isHatcherManaged"`
-}
-
 // ListResult contains the result of listing worktrees
 type ListResult struct {
 	Worktrees []WorktreeInfo `json:"worktrees"`
@@ -126,7 +116,7 @@ func (l *Lister) isHatcherManaged(worktreePath, branchName string) bool {
 	projectName := l.repo.GetProjectName()
 
 	// Check if the path follows Hatcher naming convention
-	expectedName := fmt.Sprintf("%s-%s", projectName, sanitizeBranchName(branchName))
+	expectedName := fmt.Sprintf("%s-%s", projectName, SanitizeBranchName(branchName))
 	actualName := filepath.Base(worktreePath)
 
 	return actualName == expectedName

@@ -79,7 +79,7 @@ func TestAutoCopyIntegration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Execute auto-copy
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, worktreePath, config)
 		require.NoError(t, err)
 
@@ -153,7 +153,7 @@ func TestAutoCopyIntegration(t *testing.T) {
 		config, err := LoadAutoCopyConfig([]string{configFile})
 		require.NoError(t, err)
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, worktreePath, config)
 		require.NoError(t, err)
 
@@ -195,7 +195,7 @@ func TestAutoCopyIntegration(t *testing.T) {
 		assert.Equal(t, 0, config.Version) // Legacy format
 		assert.Len(t, config.Files, 3)
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, worktreePath, config)
 		require.NoError(t, err)
 
@@ -275,7 +275,7 @@ func TestAutoCopyIntegration(t *testing.T) {
 		config, err := LoadAutoCopyConfig([]string{configFile})
 		require.NoError(t, err)
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, worktreePath, config)
 		require.NoError(t, err)
 

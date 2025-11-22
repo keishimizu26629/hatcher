@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
 	"github.com/keisukeshimizu/hatcher/internal/worktree"

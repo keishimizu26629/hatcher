@@ -56,7 +56,7 @@ func TestGlobPatternMatching(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -83,7 +83,7 @@ func TestGlobPatternMatching(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -91,7 +91,7 @@ func TestGlobPatternMatching(t *testing.T) {
 		assert.Len(t, copiedFiles, 2) // src/config.json, src/utils/rules.json
 		assert.FileExists(t, filepath.Join(dstDir, "src", "config.json"))
 		assert.FileExists(t, filepath.Join(dstDir, "src", "utils", "rules.json"))
-		assert.NoFileExists(t, filepath.Join(dstDir, "config.json")) // Root level excluded
+		assert.NoFileExists(t, filepath.Join(dstDir, "config.json"))          // Root level excluded
 		assert.NoFileExists(t, filepath.Join(dstDir, "tests", "config.json")) // Tests excluded
 	})
 
@@ -113,7 +113,7 @@ func TestGlobPatternMatching(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -154,7 +154,7 @@ func TestGlobPatternMatching(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -188,7 +188,7 @@ func TestGlobPatternMatching(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -210,7 +210,7 @@ func TestGlobPatternMatching(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -228,7 +228,7 @@ func TestGlobPatternMatching(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 
 		// Should return error for invalid pattern
@@ -325,7 +325,7 @@ func TestGlobPatternPerformance(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 

@@ -138,7 +138,7 @@ func TestWorktreeFinder_ListHatcherWorktrees(t *testing.T) {
 			for _, wt := range worktrees {
 				if wt.Path == expectedPath {
 					assert.Equal(t, branches[i], wt.Branch)
-					assert.True(t, wt.IsHatcher)
+					assert.True(t, wt.IsHatcherManaged)
 					found = true
 					break
 				}

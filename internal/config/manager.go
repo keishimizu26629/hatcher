@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/keisukeshimizu/hatcher/internal/testutil"
 	"gopkg.in/yaml.v3"
 )
 
@@ -27,28 +28,28 @@ type AutoCopyConfig struct {
 
 // AutoCopyItem represents a single item to be copied
 type AutoCopyItem struct {
-	Path       string `json:"path" yaml:"path"`
-	Directory  *bool  `json:"directory,omitempty" yaml:"directory,omitempty"`
-	Recursive  bool   `json:"recursive" yaml:"recursive"`
-	RootOnly   bool   `json:"rootOnly" yaml:"rootOnly"`
-	AutoDetect bool   `json:"autoDetect" yaml:"autoDetect"`
+	Path       string   `json:"path" yaml:"path"`
+	Directory  *bool    `json:"directory,omitempty" yaml:"directory,omitempty"`
+	Recursive  bool     `json:"recursive" yaml:"recursive"`
+	RootOnly   bool     `json:"rootOnly" yaml:"rootOnly"`
+	AutoDetect bool     `json:"autoDetect" yaml:"autoDetect"`
 	Exclude    []string `json:"exclude,omitempty" yaml:"exclude,omitempty"`
 	Include    []string `json:"include,omitempty" yaml:"include,omitempty"`
 }
 
 // EditorConfig represents editor configuration
 type EditorConfig struct {
-	Preferred    string            `json:"preferred" yaml:"preferred"`
-	AutoSwitch   bool              `json:"autoSwitch" yaml:"autoSwitch"`
-	Commands     map[string]string `json:"commands,omitempty" yaml:"commands,omitempty"`
-	WindowReuse  bool              `json:"windowReuse" yaml:"windowReuse"`
+	Preferred   string            `json:"preferred" yaml:"preferred"`
+	AutoSwitch  bool              `json:"autoSwitch" yaml:"autoSwitch"`
+	Commands    map[string]string `json:"commands,omitempty" yaml:"commands,omitempty"`
+	WindowReuse bool              `json:"windowReuse" yaml:"windowReuse"`
 }
 
 // GlobalConfig represents global settings
 type GlobalConfig struct {
-	Verbose     bool   `json:"verbose" yaml:"verbose"`
+	Verbose      bool   `json:"verbose" yaml:"verbose"`
 	OutputFormat string `json:"outputFormat" yaml:"outputFormat"`
-	ColorOutput bool   `json:"colorOutput" yaml:"colorOutput"`
+	ColorOutput  bool   `json:"colorOutput" yaml:"colorOutput"`
 }
 
 // Manager handles configuration loading, saving, and validation
@@ -210,10 +211,10 @@ func (m *Manager) MigrateConfig(rawConfig map[string]interface{}) (*Config, erro
 
 					// Auto-detect if it's a directory
 					if strings.HasSuffix(filePath, "/") {
-						item.Directory = boolPtr(true)
+						item.Directory = testutil.BoolPtr(true)
 						item.Recursive = true
 					} else {
-						item.Directory = boolPtr(false)
+						item.Directory = testutil.BoolPtr(false)
 					}
 
 					config.AutoCopy.Items = append(config.AutoCopy.Items, item)
@@ -500,23 +501,23 @@ func getDefaultConfig() *Config {
 			Items: []AutoCopyItem{
 				{
 					Path:       ".ai/",
-					Directory:  boolPtr(true),
+					Directory:  testutil.BoolPtr(true),
 					Recursive:  true,
 					AutoDetect: true,
 				},
 				{
 					Path:       ".cursorrules",
-					Directory:  boolPtr(false),
+					Directory:  testutil.BoolPtr(false),
 					AutoDetect: true,
 				},
 				{
 					Path:       ".clinerules",
-					Directory:  boolPtr(false),
+					Directory:  testutil.BoolPtr(false),
 					AutoDetect: true,
 				},
 				{
 					Path:       "CLAUDE.md",
-					Directory:  boolPtr(false),
+					Directory:  testutil.BoolPtr(false),
 					AutoDetect: true,
 				},
 			},
@@ -552,7 +553,7 @@ func (c *Config) copy() *Config {
 	// Deep copy directory pointers
 	for i := range newConfig.AutoCopy.Items {
 		if c.AutoCopy.Items[i].Directory != nil {
-			newConfig.AutoCopy.Items[i].Directory = boolPtr(*c.AutoCopy.Items[i].Directory)
+			newConfig.AutoCopy.Items[i].Directory = testutil.BoolPtr(*c.AutoCopy.Items[i].Directory)
 		}
 	}
 
@@ -560,6 +561,3 @@ func (c *Config) copy() *Config {
 }
 
 // Helper function
-func boolPtr(b bool) *bool {
-	return &b
-}

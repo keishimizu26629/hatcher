@@ -1,10 +1,10 @@
 package helpers
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -12,10 +12,10 @@ import (
 
 // TestGitRepository represents a test Git repository
 type TestGitRepository struct {
-	TempDir   string
-	RepoDir   string
+	TempDir     string
+	RepoDir     string
 	ProjectName string
-	t         *testing.T
+	t           *testing.T
 }
 
 // NewTestGitRepository creates a new test Git repository
@@ -24,10 +24,10 @@ func NewTestGitRepository(t *testing.T, projectName string) *TestGitRepository {
 	repoDir := filepath.Join(tempDir, projectName)
 
 	repo := &TestGitRepository{
-		TempDir:   tempDir,
-		RepoDir:   repoDir,
+		TempDir:     tempDir,
+		RepoDir:     repoDir,
 		ProjectName: projectName,
-		t:         t,
+		t:           t,
 	}
 
 	repo.initializeRepo()

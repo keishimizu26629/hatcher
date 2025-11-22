@@ -1,0 +1,90 @@
+services:
+  # Development environment
+  hatcher-dev:
+    build:
+      context: .
+      target: test
+    container_name: hatcher-dev
+    volumes:
+      - .:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    working_dir: /app
+    environment:
+      - CGO_ENABLED=0
+      - GOOS=linux
+      - GOARCH=amd64
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+
+  # Test runner
+  hatcher-test:
+    build:
+      context: .
+      target: test
+    container_name: hatcher-test
+    volumes:
+      - .:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+      - ./reports:/app/reports
+    working_dir: /app
+    environment:
+      - CGO_ENABLED=0
+    command: ./scripts/run-tests.sh
+
+  # Production build
+  hatcher-prod:
+    build:
+      context: .
+      target: production
+    container_name: hatcher-prod
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./test-workspace:/workspace
+      - /Users/keisukeshimizu/Library/CloudStorage/GoogleDrive-keisukeshimizu.inoworl@gmail.com/マイドライブ/Obsidian/my-work-vault/projects/hatcher:/obsidian-project:ro
+    working_dir: /workspace
+    environment:
+      - HATCHER_VERBOSE=true
+      - OBSIDIAN_PROJECT_PATH=/obsidian-project
+
+  # Multi-platform build test
+  hatcher-build-test:
+    build:
+      context: .
+      target: builder
+    container_name: hatcher-build-test
+    volumes:
+      - .:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+      - ./dist:/app/dist
+    working_dir: /app
+    command: make build-all
+
+  # Performance test environment
+  hatcher-perf:
+    build:
+      context: .
+      target: test
+    container_name: hatcher-perf
+    volumes:
+      - .:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+      - ./reports:/app/reports
+    working_dir: /app
+    environment:
+      - CGO_ENABLED=0
+    command: make test-bench
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2.0'
+
+volumes:
+  go-mod-cache:
+  go-build-cache:

@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
@@ -26,22 +25,22 @@ const (
 
 // ProgressUpdate represents a progress update during copying
 type ProgressUpdate struct {
-	Type         ProgressType `json:"type"`
-	Message      string       `json:"message"`
-	Current      int          `json:"current"`
-	Total        int          `json:"total"`
-	Percentage   float64      `json:"percentage"`
-	BytesCopied  int64        `json:"bytesCopied"`
-	TotalBytes   int64        `json:"totalBytes"`
+	Type         ProgressType  `json:"type"`
+	Message      string        `json:"message"`
+	Current      int           `json:"current"`
+	Total        int           `json:"total"`
+	Percentage   float64       `json:"percentage"`
+	BytesCopied  int64         `json:"bytesCopied"`
+	TotalBytes   int64         `json:"totalBytes"`
 	ElapsedTime  time.Duration `json:"elapsedTime"`
 	EstimatedETA time.Duration `json:"estimatedETA"`
 }
 
 // CopyError represents an error during copying
 type CopyError struct {
-	SourcePath string `json:"sourcePath"`
-	DestPath   string `json:"destPath"`
-	Error      error  `json:"error"`
+	SourcePath string    `json:"sourcePath"`
+	DestPath   string    `json:"destPath"`
+	Error      error     `json:"error"`
 	Timestamp  time.Time `json:"timestamp"`
 }
 
@@ -55,14 +54,14 @@ type CopyTask struct {
 
 // ParallelCopyOptions contains options for parallel copying
 type ParallelCopyOptions struct {
-	MaxWorkers       int                           // Maximum number of worker goroutines
-	BufferSize       int                           // Buffer size for file copying
-	ShowProgress     bool                          // Whether to show progress updates
-	VerifyIntegrity  bool                          // Whether to verify file integrity after copying
-	ChecksumType     string                        // Type of checksum to use (sha256, md5)
-	ContinueOnError  bool                          // Whether to continue on individual file errors
-	ProgressCallback func(ProgressUpdate)         // Callback for progress updates
-	ErrorCallback    func(CopyError)              // Callback for errors
+	MaxWorkers       int                  // Maximum number of worker goroutines
+	BufferSize       int                  // Buffer size for file copying
+	ShowProgress     bool                 // Whether to show progress updates
+	VerifyIntegrity  bool                 // Whether to verify file integrity after copying
+	ChecksumType     string               // Type of checksum to use (sha256, md5)
+	ContinueOnError  bool                 // Whether to continue on individual file errors
+	ProgressCallback func(ProgressUpdate) // Callback for progress updates
+	ErrorCallback    func(CopyError)      // Callback for errors
 }
 
 // ParallelCopier handles parallel file copying operations
@@ -72,17 +71,17 @@ type ParallelCopier struct {
 	options ParallelCopyOptions
 
 	// Internal state
-	taskQueue    chan CopyTask
-	results      chan error
-	progress     chan ProgressUpdate
-	errors       chan CopyError
-	wg           sync.WaitGroup
-	totalTasks   int
+	taskQueue      chan CopyTask
+	results        chan error
+	progress       chan ProgressUpdate
+	errors         chan CopyError
+	wg             sync.WaitGroup
+	totalTasks     int
 	completedTasks int
-	totalBytes   int64
-	copiedBytes  int64
-	startTime    time.Time
-	mutex        sync.RWMutex
+	totalBytes     int64
+	copiedBytes    int64
+	startTime      time.Time
+	mutex          sync.RWMutex
 }
 
 // NewParallelCopier creates a new parallel copier

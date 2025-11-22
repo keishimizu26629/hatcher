@@ -1,7 +1,6 @@
 package editor
 
 import (
-	"os"
 	"os/exec"
 	"testing"
 
@@ -265,7 +264,7 @@ func TestEditorDetection_Integration(t *testing.T) {
 
 		// This should not exist and should be safely handled
 		editor := detector.GetEditorByName("rm") // Dangerous command
-		assert.Nil(t, editor) // Should not be in our predefined list
+		assert.Nil(t, editor)                    // Should not be in our predefined list
 	})
 }
 

@@ -49,7 +49,7 @@ func TestAutoCopier_CopyFiles(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -84,7 +84,7 @@ func TestAutoCopier_CopyFiles(t *testing.T) {
 			Files:   []string{".ai/", ".cursorrules", "CLAUDE.md"},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -113,7 +113,7 @@ func TestAutoCopier_CopyFiles(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -146,7 +146,7 @@ func TestAutoCopier_CopyFiles(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -175,7 +175,7 @@ func TestAutoCopier_CopyFiles(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -196,7 +196,7 @@ func TestAutoCopier_CopyFiles(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, dstDir, config)
 		require.NoError(t, err)
 
@@ -221,7 +221,7 @@ func TestAutoCopier_CopyFiles(t *testing.T) {
 			},
 		}
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.CopyFiles(testRepo.RepoDir, readOnlyDir, config)
 
 		// Should return error due to permission issues
@@ -249,7 +249,7 @@ func TestAutoCopier_ProcessGlobPattern(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("simple glob pattern", func(t *testing.T) {
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.ProcessGlobPattern("*.json", testRepo.RepoDir, dstDir)
 		require.NoError(t, err)
 
@@ -266,7 +266,7 @@ func TestAutoCopier_ProcessGlobPattern(t *testing.T) {
 		err = os.MkdirAll(dstDir, 0755)
 		require.NoError(t, err)
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.ProcessGlobPattern("**/*.json", testRepo.RepoDir, dstDir)
 		require.NoError(t, err)
 
@@ -285,7 +285,7 @@ func TestAutoCopier_ProcessGlobPattern(t *testing.T) {
 		err = os.MkdirAll(dstDir, 0755)
 		require.NoError(t, err)
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.ProcessGlobPattern("src/config/*.json", testRepo.RepoDir, dstDir)
 		require.NoError(t, err)
 
@@ -296,7 +296,7 @@ func TestAutoCopier_ProcessGlobPattern(t *testing.T) {
 	})
 
 	t.Run("no matches", func(t *testing.T) {
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		copiedFiles, err := copier.ProcessGlobPattern("*.nonexistent", testRepo.RepoDir, dstDir)
 		require.NoError(t, err)
 
@@ -309,7 +309,7 @@ func TestAutoCopier_UpdateGitignore(t *testing.T) {
 	testRepo := helpers.NewTestGitRepository(t, "gitignore-test")
 
 	t.Run("create new gitignore", func(t *testing.T) {
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		files := []string{".ai/", ".cursorrules", "CLAUDE.md"}
 
 		err := copier.UpdateGitignore(testRepo.RepoDir, files)
@@ -337,7 +337,7 @@ func TestAutoCopier_UpdateGitignore(t *testing.T) {
 		err := os.WriteFile(gitignorePath, []byte(existingContent), 0644)
 		require.NoError(t, err)
 
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		files := []string{"new-file.txt"}
 
 		err = copier.UpdateGitignore(testRepo.RepoDir, files)
@@ -355,7 +355,7 @@ func TestAutoCopier_UpdateGitignore(t *testing.T) {
 	})
 
 	t.Run("empty files list", func(t *testing.T) {
-		copier := NewAutoCopier()
+		copier := NewLegacyAutoCopier()
 		err := copier.UpdateGitignore(testRepo.RepoDir, []string{})
 		require.NoError(t, err)
 

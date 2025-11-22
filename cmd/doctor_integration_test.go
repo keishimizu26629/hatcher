@@ -198,9 +198,9 @@ func TestDoctorCommand_EdgeCases(t *testing.T) {
 		// Should show overall status
 		assert.True(t,
 			strings.Contains(output, "Healthy") ||
-			strings.Contains(output, "Issues Found") ||
-			strings.Contains(output, "passed") ||
-			strings.Contains(output, "failed"))
+				strings.Contains(output, "Issues Found") ||
+				strings.Contains(output, "passed") ||
+				strings.Contains(output, "failed"))
 	})
 
 	t.Run("check individual diagnostic components", func(t *testing.T) {
@@ -229,8 +229,8 @@ func TestDoctorCommand_EdgeCases(t *testing.T) {
 
 		// Should contain status indicators
 		hasStatusIndicators := strings.Contains(output, "✅") ||
-							   strings.Contains(output, "⚠️") ||
-							   strings.Contains(output, "❌")
+			strings.Contains(output, "⚠️") ||
+			strings.Contains(output, "❌")
 		assert.True(t, hasStatusIndicators, "Should contain status indicators")
 	})
 }

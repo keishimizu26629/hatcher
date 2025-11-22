@@ -56,10 +56,10 @@ func BenchmarkParallelCopy(b *testing.B) {
 // BenchmarkSequentialVsParallel compares sequential vs parallel performance
 func BenchmarkSequentialVsParallel(b *testing.B) {
 	testCases := []struct {
-		name       string
-		workers    int
-		fileCount  int
-		fileSize   int
+		name      string
+		workers   int
+		fileCount int
+		fileSize  int
 	}{
 		{"Sequential_10files", 1, 10, 1024},
 		{"Parallel4_10files", 4, 10, 1024},
@@ -149,8 +149,8 @@ func BenchmarkMemoryUsage(b *testing.B) {
 		require.NoError(b, err)
 
 		copier := NewParallelCopier(repo, config, ParallelCopyOptions{
-			MaxWorkers:  2,
-			BufferSize:  64 * 1024, // 64KB buffer
+			MaxWorkers: 2,
+			BufferSize: 64 * 1024, // 64KB buffer
 		})
 
 		err = copier.Run(testRepo.RepoDir, destDir)

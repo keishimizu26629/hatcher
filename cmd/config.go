@@ -44,7 +44,7 @@ Examples:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		global, _ := cmd.Flags().GetBool("global")
 		force, _ := cmd.Flags().GetBool("force")
-		format, _ := cmd.Flags().GetString("format")
+		_, _ = cmd.Flags().GetString("format") // format not used in init
 
 		manager := config.NewManager()
 

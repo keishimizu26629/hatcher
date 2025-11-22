@@ -1,6 +1,7 @@
 package security
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,12 +38,9 @@ func TestPathTraversalPrevention(t *testing.T) {
 		}
 
 		// Validate config should reject malicious paths
-		errors := autocopy.ValidateAutoCopyConfig(maliciousConfig)
-		assert.NotEmpty(t, errors, "Config validation should reject path traversal attempts")
-
-		for _, err := range errors {
-			assert.Contains(t, strings.ToLower(err), "invalid path", "Error should mention invalid path")
-		}
+		err := autocopy.ValidateAutoCopyConfig(maliciousConfig)
+		assert.Error(t, err, "Config validation should reject path traversal attempts")
+		assert.Contains(t, strings.ToLower(err.Error()), "dangerous path", "Error should mention dangerous path")
 	})
 
 	t.Run("prevent symlink attacks", func(t *testing.T) {
@@ -202,9 +200,9 @@ func TestFilePermissions(t *testing.T) {
 	t.Run("respect file permissions", func(t *testing.T) {
 		// Create files with different permissions
 		testFiles := map[string]os.FileMode{
-			"readonly.txt":   0444,
-			"executable.sh":  0755,
-			"private.key":    0600,
+			"readonly.txt":  0444,
+			"executable.sh": 0755,
+			"private.key":   0600,
 		}
 
 		for filename, perm := range testFiles {

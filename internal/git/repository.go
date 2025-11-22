@@ -112,7 +112,7 @@ func (r *GitRepository) BranchExists(branch string) (bool, error) {
 
 	if err != nil {
 		// Check if it's an exit error (branch doesn't exist)
-		if exitError, ok := err.(*exec.ExitError); ok {
+		if _, ok := err.(*exec.ExitError); ok {
 			return false, nil
 		}
 		return false, fmt.Errorf("failed to check branch existence: %w", err)
@@ -129,7 +129,7 @@ func (r *GitRepository) RemoteBranchExists(branch string) (bool, error) {
 
 	if err != nil {
 		// Check if it's an exit error (branch doesn't exist)
-		if exitError, ok := err.(*exec.ExitError); ok {
+		if _, ok := err.(*exec.ExitError); ok {
 			return false, nil
 		}
 		return false, fmt.Errorf("failed to check remote branch existence: %w", err)
@@ -283,6 +283,46 @@ func (r *GitRepository) UpdateGitignore(files []string) error {
 
 	// Write back to .gitignore
 	return os.WriteFile(gitignorePath, []byte(content), 0644)
+}
+
+// DeleteBranch deletes a local branch
+func (r *GitRepository) DeleteBranch(branch string, force bool) error {
+	args := []string{"branch"}
+	if force {
+		args = append(args, "-D")
+	} else {
+		args = append(args, "-d")
+	}
+	args = append(args, branch)
+
+	cmd := exec.Command("git", args...)
+	cmd.Dir = r.root
+	err := cmd.Run()
+
+	if err != nil {
+		if _, ok := err.(*exec.ExitError); ok {
+			return fmt.Errorf("failed to delete branch %s: branch may not exist or has unmerged changes", branch)
+		}
+		return fmt.Errorf("failed to delete branch %s: %w", branch, err)
+	}
+
+	return nil
+}
+
+// DeleteRemoteBranch deletes a remote branch
+func (r *GitRepository) DeleteRemoteBranch(branch string) error {
+	cmd := exec.Command("git", "push", "origin", "--delete", branch)
+	cmd.Dir = r.root
+	err := cmd.Run()
+
+	if err != nil {
+		if _, ok := err.(*exec.ExitError); ok {
+			return fmt.Errorf("failed to delete remote branch %s: branch may not exist on remote", branch)
+		}
+		return fmt.Errorf("failed to delete remote branch %s: %w", branch, err)
+	}
+
+	return nil
 }
 
 // getGitRoot returns the root directory of the Git repository

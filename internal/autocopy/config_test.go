@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/keisukeshimizu/hatcher/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -181,7 +182,7 @@ func TestAutoCopyConfig_Validate(t *testing.T) {
 			Items: []AutoCopyItem{
 				{
 					Path:      ".ai/",
-					Directory: boolPtr(true),
+					Directory: testutil.BoolPtr(true),
 					RootOnly:  true,
 				},
 				{
@@ -244,7 +245,7 @@ func TestAutoCopyConfig_Validate(t *testing.T) {
 			Items: []AutoCopyItem{
 				{
 					Path:       ".cursorrules",
-					Directory:  boolPtr(true),
+					Directory:  testutil.BoolPtr(true),
 					AutoDetect: true, // Conflicting with explicit directory setting
 					RootOnly:   true,
 				},
@@ -267,7 +268,7 @@ func TestAutoCopyItem_IsDirectory(t *testing.T) {
 			name: "explicit directory true",
 			item: AutoCopyItem{
 				Path:      ".ai/",
-				Directory: boolPtr(true),
+				Directory: testutil.BoolPtr(true),
 			},
 			expected: true,
 		},
@@ -275,7 +276,7 @@ func TestAutoCopyItem_IsDirectory(t *testing.T) {
 			name: "explicit directory false",
 			item: AutoCopyItem{
 				Path:      "file.txt",
-				Directory: boolPtr(false),
+				Directory: testutil.BoolPtr(false),
 			},
 			expected: false,
 		},
@@ -356,9 +357,4 @@ func TestAutoCopyItem_IsGlobPattern(t *testing.T) {
 			assert.Equal(t, tt.expected, result)
 		})
 	}
-}
-
-// Helper function to create bool pointer
-func boolPtr(b bool) *bool {
-	return &b
 }

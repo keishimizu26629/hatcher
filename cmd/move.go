@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/keisukeshimizu/hatcher/internal/editor"
+	editorpkg "github.com/keisukeshimizu/hatcher/internal/editor"
 	"github.com/keisukeshimizu/hatcher/internal/git"
 	"github.com/keisukeshimizu/hatcher/internal/worktree"
 	"github.com/spf13/cobra"
@@ -57,7 +57,7 @@ func runMove(cmd *cobra.Command, args []string) error {
 	}
 
 	// Initialize editor detector
-	detector := editor.NewDetector()
+	detector := editorpkg.NewDetector()
 
 	// Create mover
 	mover := worktree.NewMover(repo, detector)

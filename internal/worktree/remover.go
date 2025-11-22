@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
@@ -175,8 +174,11 @@ func (r *Remover) ValidateRemoval(branchName string) (*RemovalValidation, error)
 	}
 
 	// Find the worktree path
-	worktreePath, err := r.finder.FindWorktreePath(branchName)
+	worktreePath, found, err := r.finder.FindWorktree(branchName)
 	if err != nil {
+		return nil, fmt.Errorf("failed to find worktree: %w", err)
+	}
+	if !found {
 		// Worktree doesn't exist
 		validation.WorktreeExists = false
 		validation.CanRemove = false

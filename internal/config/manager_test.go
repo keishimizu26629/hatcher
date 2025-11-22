@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/keisukeshimizu/hatcher/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -174,7 +175,7 @@ func TestManager_SaveConfig(t *testing.T) {
 				Items: []AutoCopyItem{
 					{
 						Path:      ".ai/",
-						Directory: boolPtr(true),
+						Directory: testutil.BoolPtr(true),
 						Recursive: true,
 					},
 				},
@@ -207,7 +208,7 @@ func TestManager_SaveConfig(t *testing.T) {
 				Items: []AutoCopyItem{
 					{
 						Path:      ".cursorrules",
-						Directory: boolPtr(false),
+						Directory: testutil.BoolPtr(false),
 					},
 				},
 			},
@@ -244,7 +245,7 @@ func TestManager_ValidateConfig(t *testing.T) {
 				Items: []AutoCopyItem{
 					{
 						Path:      ".ai/",
-						Directory: boolPtr(true),
+						Directory: testutil.BoolPtr(true),
 						Recursive: true,
 					},
 				},
@@ -381,9 +382,4 @@ func TestManager_GetConfigPaths(t *testing.T) {
 
 		assert.Equal(t, expected, paths)
 	})
-}
-
-// Helper function
-func boolPtr(b bool) *bool {
-	return &b
 }

@@ -10,9 +10,10 @@ import (
 	"time"
 
 	"github.com/keisukeshimizu/hatcher/internal/git"
+	"github.com/keisukeshimizu/hatcher/internal/testutil"
 	"github.com/keisukeshimizu/hatcher/test/helpers"
 	"github.com/stretchr/testify/assert"
-	"github.stretchr/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParallelCopier_Run(t *testing.T) {
@@ -50,18 +51,18 @@ func TestParallelCopier_Run(t *testing.T) {
 		config := &AutoCopyConfig{
 			Version: 2,
 			Items: []AutoCopyItem{
-				{Path: ".ai/", Directory: boolPtr(true), Recursive: true},
-				{Path: ".cursorrules", Directory: boolPtr(false)},
-				{Path: ".clinerules", Directory: boolPtr(false)},
-				{Path: "CLAUDE.md", Directory: boolPtr(false)},
+				{Path: ".ai/", Directory: testutil.BoolPtr(true), Recursive: true},
+				{Path: ".cursorrules", Directory: testutil.BoolPtr(false)},
+				{Path: ".clinerules", Directory: testutil.BoolPtr(false)},
+				{Path: "CLAUDE.md", Directory: testutil.BoolPtr(false)},
 			},
 		}
 
 		// Create parallel copier
 		copier := NewParallelCopier(repo, config, ParallelCopyOptions{
-			MaxWorkers:    4,
-			BufferSize:    1024,
-			ShowProgress:  false,
+			MaxWorkers:      4,
+			BufferSize:      1024,
+			ShowProgress:    false,
 			VerifyIntegrity: true,
 		})
 
@@ -102,7 +103,7 @@ func TestParallelCopier_Run(t *testing.T) {
 		config := &AutoCopyConfig{
 			Version: 2,
 			Items: []AutoCopyItem{
-				{Path: "file*.txt", Directory: boolPtr(false), UseGlob: true},
+				{Path: "file*.txt", Directory: testutil.BoolPtr(false), UseGlob: true},
 			},
 		}
 
@@ -162,7 +163,7 @@ func TestParallelCopier_Run(t *testing.T) {
 		config := &AutoCopyConfig{
 			Version: 2,
 			Items: []AutoCopyItem{
-				{Path: "*.txt", Directory: boolPtr(false), UseGlob: true},
+				{Path: "*.txt", Directory: testutil.BoolPtr(false), UseGlob: true},
 			},
 		}
 
@@ -197,8 +198,8 @@ func TestParallelCopier_Run(t *testing.T) {
 		config := &AutoCopyConfig{
 			Version: 2,
 			Items: []AutoCopyItem{
-				{Path: "valid.txt", Directory: boolPtr(false)},
-				{Path: "nonexistent.txt", Directory: boolPtr(false)}, // This will fail
+				{Path: "valid.txt", Directory: testutil.BoolPtr(false)},
+				{Path: "nonexistent.txt", Directory: testutil.BoolPtr(false)}, // This will fail
 			},
 		}
 
@@ -212,9 +213,9 @@ func TestParallelCopier_Run(t *testing.T) {
 		}
 
 		copier := NewParallelCopier(repo, config, ParallelCopyOptions{
-			MaxWorkers:    2,
+			MaxWorkers:      2,
 			ContinueOnError: true,
-			ErrorCallback: errorCallback,
+			ErrorCallback:   errorCallback,
 		})
 
 		err = copier.Run(testRepo.RepoDir, destDir)
@@ -243,7 +244,7 @@ func TestParallelCopier_Run(t *testing.T) {
 		config := &AutoCopyConfig{
 			Version: 2,
 			Items: []AutoCopyItem{
-				{Path: "perf*.txt", Directory: boolPtr(false), UseGlob: true},
+				{Path: "perf*.txt", Directory: testutil.BoolPtr(false), UseGlob: true},
 			},
 		}
 
@@ -310,7 +311,7 @@ func TestParallelCopier_WorkerPool(t *testing.T) {
 		config := &AutoCopyConfig{
 			Version: 2,
 			Items: []AutoCopyItem{
-				{Path: "worker*.txt", Directory: boolPtr(false), UseGlob: true},
+				{Path: "worker*.txt", Directory: testutil.BoolPtr(false), UseGlob: true},
 			},
 		}
 
@@ -341,6 +342,3 @@ func TestParallelCopier_WorkerPool(t *testing.T) {
 }
 
 // Helper function
-func boolPtr(b bool) *bool {
-	return &b
-}

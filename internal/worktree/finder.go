@@ -22,27 +22,6 @@ func NewFinder(repo git.Repository) *Finder {
 	}
 }
 
-// WorktreeInfo represents information about a worktree
-type WorktreeInfo struct {
-	Branch    string    `json:"branch"`
-	Path      string    `json:"path"`
-	Head      string    `json:"head"`
-	Status    string    `json:"status"`
-	Created   time.Time `json:"created"`
-	IsHatcher bool      `json:"isHatcher"`
-	Editor    string    `json:"editor,omitempty"`
-}
-
-// WorktreeStatus represents the status of a worktree
-type WorktreeStatus string
-
-const (
-	StatusClean   WorktreeStatus = "clean"
-	StatusDirty   WorktreeStatus = "dirty"
-	StatusActive  WorktreeStatus = "active"
-	StatusUnknown WorktreeStatus = "unknown"
-)
-
 // FindWorktree finds a worktree for the given branch name
 func (f *Finder) FindWorktree(branchName string) (string, bool, error) {
 	// Get all worktrees
@@ -145,22 +124,14 @@ func (f *Finder) convertToWorktreeInfo(gitWt git.Worktree, projectName string) (
 		created = time.Now()
 	}
 
-	// Determine status (simplified for now)
-	status := string(StatusClean)
-	if gitWt.Status == git.StatusDirty {
-		status = string(StatusDirty)
-	} else if gitWt.Status == git.StatusActive {
-		status = string(StatusActive)
-	}
-
 	return &WorktreeInfo{
-		Branch:    gitWt.Branch,
-		Path:      gitWt.Path,
-		Head:      gitWt.Head,
-		Status:    status,
-		Created:   created,
-		IsHatcher: isHatcher,
-		Editor:    "", // Will be populated by editor detection
+		Branch:           gitWt.Branch,
+		Path:             gitWt.Path,
+		Head:             gitWt.Head,
+		Status:           gitWt.Status,
+		Created:          created,
+		IsHatcherManaged: isHatcher,
+		Editor:           "", // Will be populated by editor detection
 	}, nil
 }
 
@@ -190,32 +161,4 @@ func (f *Finder) extractBranchFromPath(worktreePath, projectName string) string 
 
 	// If no clear pattern, return as-is with dashes converted to slashes
 	return branchName
-}
-
-// IsHatcherWorktree checks if a worktree was created by Hatcher
-func IsHatcherWorktree(worktreePath, projectName string) bool {
-	dirName := filepath.Base(worktreePath)
-	expectedPrefix := projectName + "-"
-
-	// Must start with project name followed by dash
-	if !strings.HasPrefix(dirName, expectedPrefix) {
-		return false
-	}
-
-	// Must not be the main repository (exact project name)
-	if dirName == projectName {
-		return false
-	}
-
-	// Must have something after the project name and dash
-	suffix := strings.TrimPrefix(dirName, expectedPrefix)
-	return len(suffix) > 0
-}
-
-// GenerateWorktreePath generates the expected path for a hatcher worktree
-func GenerateWorktreePath(repoRoot, projectName, branchName string) string {
-	branchNameSafe := SanitizeBranchName(branchName)
-	dirName := fmt.Sprintf("%s-%s", projectName, branchNameSafe)
-	parentDir := filepath.Dir(repoRoot)
-	return filepath.Join(parentDir, dirName)
 }

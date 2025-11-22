@@ -35,11 +35,11 @@ func TestRemover_RemoveWorktree(t *testing.T) {
 
 		// Remove worktree only
 		options := RemoveOptions{
-			BranchName:    branchName,
-			RemoveBranch:  false,
-			RemoveRemote:  false,
-			Force:         false,
-			SkipConfirm:   true, // Skip confirmation for tests
+			BranchName:   branchName,
+			RemoveBranch: false,
+			RemoveRemote: false,
+			Force:        false,
+			SkipConfirm:  true, // Skip confirmation for tests
 		}
 
 		result, err := remover.RemoveWorktree(options)
