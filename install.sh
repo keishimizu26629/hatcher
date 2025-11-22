@@ -168,13 +168,13 @@ install_binary() {
         sudo chmod +x "$install_path"
         
         # Create hch alias
-        sudo ln -sf "$install_path" "$hch_path"
+        sudo ln -sf "$(basename "$install_path")" "$hch_path"
     else
         cp "$binary_path" "$install_path"
         chmod +x "$install_path"
         
         # Create hch alias
-        ln -sf "$install_path" "$hch_path"
+        ln -sf "$(basename "$install_path")" "$hch_path"
     fi
     
     log_success "Hatcher installed to $install_path"
