@@ -7,6 +7,7 @@ import (
 
 	"github.com/keisukeshimizu/hatcher/internal/autocopy"
 	"github.com/keisukeshimizu/hatcher/internal/git"
+	"github.com/keisukeshimizu/hatcher/internal/logger"
 	"github.com/keisukeshimizu/hatcher/internal/worktree"
 	"github.com/spf13/cobra"
 )
@@ -48,16 +49,27 @@ func init() {
 
 func runCreate(cmd *cobra.Command, args []string) error {
 	branchName := args[0]
+	
+	// Update logger verbose setting
+	logger.UpdateVerbose()
+	log := logger.GetLogger()
+
+	log.Debug("Starting worktree creation process")
+	log.Verbose("Branch name: %s", branchName)
+	log.Verbose("Flags - Force: %t, NoCopy: %t, NoGitignoreUpdate: %t, DryRun: %t", force, noCopy, noGitignoreUpdate, dryRun)
 
 	if verbose {
 		fmt.Printf("🔍 Creating worktree for branch '%s'\n", branchName)
 	}
 
 	// Initialize Git repository
+	log.Debug("Initializing Git repository")
 	repo, err := git.NewRepository()
 	if err != nil {
+		log.Error("Failed to initialize Git repository: %v", err)
 		return fmt.Errorf("❌ Not in a Git repository: %w", err)
 	}
+	log.Debug("Git repository initialized successfully")
 
 	// Create worktree creator
 	creator := worktree.NewCreator(repo)

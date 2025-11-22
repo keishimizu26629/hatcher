@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/keisukeshimizu/hatcher/internal/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -40,6 +41,9 @@ Examples:
 	// Default command: create worktree
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Update logger verbose setting
+		logger.UpdateVerbose()
+		
 		if len(args) == 1 {
 			// If branch name is provided, run create command
 			return runCreate(cmd, args)
