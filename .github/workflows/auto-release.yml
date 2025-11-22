@@ -1,0 +1,157 @@
+name: Auto Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '.gitignore'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should-release: ${{ steps.check.outputs.should-release }}
+      version-type: ${{ steps.check.outputs.version-type }}
+      new-version: ${{ steps.check.outputs.new-version }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check if release is needed
+      id: check
+      run: |
+        # Get the latest tag
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        echo "Latest tag: $LATEST_TAG"
+        
+        # Get commits since last tag
+        COMMITS_SINCE_TAG=$(git rev-list ${LATEST_TAG}..HEAD --count)
+        echo "Commits since tag: $COMMITS_SINCE_TAG"
+        
+        if [ "$COMMITS_SINCE_TAG" -eq 0 ]; then
+          echo "should-release=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        # Check commit messages for version type
+        COMMIT_MESSAGES=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s")
+        echo "Commit messages:"
+        echo "$COMMIT_MESSAGES"
+        
+        # Determine version bump type
+        if echo "$COMMIT_MESSAGES" | grep -qE "^(feat|feature)(\(.+\))?!:|^BREAKING CHANGE:|breaking change"; then
+          VERSION_TYPE="major"
+        elif echo "$COMMIT_MESSAGES" | grep -qE "^(feat|feature)(\(.+\))?:|^✨|🚀"; then
+          VERSION_TYPE="minor"
+        elif echo "$COMMIT_MESSAGES" | grep -qE "^(fix|bugfix)(\(.+\))?:|^🐛|🔧|⚡|🎨"; then
+          VERSION_TYPE="patch"
+        else
+          VERSION_TYPE="patch"  # Default to patch for any changes
+        fi
+        
+        echo "Version type: $VERSION_TYPE"
+        
+        # Calculate new version
+        CURRENT_VERSION=${LATEST_TAG#v}
+        IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+        MAJOR=${VERSION_PARTS[0]:-0}
+        MINOR=${VERSION_PARTS[1]:-0}
+        PATCH=${VERSION_PARTS[2]:-0}
+        
+        case $VERSION_TYPE in
+          major)
+            NEW_VERSION="$((MAJOR + 1)).0.0"
+            ;;
+          minor)
+            NEW_VERSION="${MAJOR}.$((MINOR + 1)).0"
+            ;;
+          patch)
+            NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+            ;;
+        esac
+        
+        echo "New version: v$NEW_VERSION"
+        echo "should-release=true" >> $GITHUB_OUTPUT
+        echo "version-type=$VERSION_TYPE" >> $GITHUB_OUTPUT
+        echo "new-version=v$NEW_VERSION" >> $GITHUB_OUTPUT
+
+  auto-release:
+    needs: check-changes
+    if: needs.check-changes.outputs.should-release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Create and push tag
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        NEW_VERSION="${{ needs.check-changes.outputs.new-version }}"
+        VERSION_TYPE="${{ needs.check-changes.outputs.version-type }}"
+        
+        # Generate release notes
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        
+        case $VERSION_TYPE in
+          major)
+            RELEASE_TITLE="🎉 Major Release $NEW_VERSION"
+            EMOJI="🚀"
+            ;;
+          minor)
+            RELEASE_TITLE="✨ Feature Release $NEW_VERSION"
+            EMOJI="✨"
+            ;;
+          patch)
+            RELEASE_TITLE="🔧 Bug Fix Release $NEW_VERSION"
+            EMOJI="🔧"
+            ;;
+        esac
+        
+        # Create release notes
+        RELEASE_NOTES="$RELEASE_TITLE
+
+## 📝 Changes since $LATEST_TAG
+
+$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s" --reverse)
+
+## 📦 Installation
+
+\`\`\`bash
+# Quick install (recommended)
+curl -fsSL https://keishimizu26629.github.io/hatcher/install.sh | bash
+
+# Homebrew
+brew tap keishimizu26629/tap
+brew install hatcher
+\`\`\`
+
+---
+*This release was automatically generated from commits to main branch.*"
+        
+        # Create tag with release notes
+        git tag -a "$NEW_VERSION" -m "$RELEASE_NOTES"
+        git push origin "$NEW_VERSION"
+        
+        echo "Created and pushed tag: $NEW_VERSION"
+
+  notify:
+    needs: [check-changes, auto-release]
+    if: needs.check-changes.outputs.should-release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Notify release
+      run: |
+        echo "🎉 Automatically created release ${{ needs.check-changes.outputs.new-version }}"
+        echo "Release type: ${{ needs.check-changes.outputs.version-type }}"
+        echo "The release workflow will now build and publish binaries."

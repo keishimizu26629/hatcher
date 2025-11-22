@@ -49,9 +49,9 @@ jobs:
         if [ "${{ matrix.os }}" = "windows" ]; then
           BINARY_NAME="${BINARY_NAME}.exe"
         fi
-        
+
         go build -ldflags "-s -w -X main.Version=${{ steps.version.outputs.VERSION }}" -o "${BINARY_NAME}" ./main.go
-        
+
         # Create checksum
         if command -v sha256sum >/dev/null 2>&1; then
           sha256sum "${BINARY_NAME}" > "${BINARY_NAME}.sha256"
