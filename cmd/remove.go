@@ -22,7 +22,9 @@ Examples:
   hch remove feature/new-ui --branch     # Remove worktree and local branch
   hch remove feature/new-ui --all        # Remove worktree, local and remote branch
   hch remove feature/new-ui --force      # Force removal even with uncommitted changes
-  hch remove feature/new-ui --yes        # Skip confirmation prompt`,
+  hch remove feature/new-ui --yes        # Skip confirmation prompt
+  hch remove feature/new-ui -bfy         # Combined flags: branch + force + yes
+  hch remove feature/new-ui -afy         # Combined flags: all + force + yes`,
 	Aliases: []string{"rm", "delete", "del"},
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -113,7 +115,7 @@ func init() {
 
 	// Add flags
 	removeCmd.Flags().BoolP("branch", "b", false, "Also remove the local branch")
-	removeCmd.Flags().Bool("all", false, "Remove worktree, local branch, and remote branch")
+	removeCmd.Flags().BoolP("all", "a", false, "Remove worktree, local branch, and remote branch")
 	removeCmd.Flags().BoolP("force", "f", false, "Force removal even if there are uncommitted changes")
 	removeCmd.Flags().BoolP("yes", "y", false, "Skip confirmation prompt")
 	removeCmd.Flags().Bool("dry-run", false, "Show what would be removed without actually removing")
