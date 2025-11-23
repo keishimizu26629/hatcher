@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/keisukeshimizu/hatcher/internal/autocopy"
+	"github.com/keisukeshimizu/hatcher/internal/config"
 	"github.com/keisukeshimizu/hatcher/internal/git"
 	"github.com/keisukeshimizu/hatcher/internal/logger"
 	"github.com/keisukeshimizu/hatcher/internal/worktree"
@@ -147,26 +146,46 @@ func autoCopyFiles(srcRoot, worktreePath string) error {
 		fmt.Println("📋 Auto-copying configuration files...")
 	}
 
-	// Define configuration file paths in priority order
-	configPaths := []string{
-		filepath.Join(srcRoot, ".vscode", "auto-copy-files.json"),
-		filepath.Join(srcRoot, ".worktree-files", "auto-copy-files.json"),
-		filepath.Join(os.Getenv("HOME"), ".config", "git", "worktree-files", "auto-copy-files.json"),
+	// Use the new config manager to load configuration
+	manager := config.NewManager()
+	hatcherConfig, err := manager.LoadConfig(srcRoot)
+	if err != nil {
+		return fmt.Errorf("failed to load hatcher configuration: %w", err)
 	}
 
-	// Load configuration
-	config, err := autocopy.LoadAutoCopyConfig(configPaths)
-	if err != nil {
-		return fmt.Errorf("failed to load auto-copy configuration: %w", err)
+	// Convert hatcher config to autocopy config
+	autoCopyConfig := &autocopy.AutoCopyConfig{
+		Version: hatcherConfig.AutoCopy.Version,
+		Items:   make([]autocopy.AutoCopyItem, len(hatcherConfig.AutoCopy.Items)),
+		Files:   hatcherConfig.AutoCopy.Files,
+	}
+
+	// Convert items
+	for i, item := range hatcherConfig.AutoCopy.Items {
+		autoCopyItem := autocopy.AutoCopyItem{
+			Path:       item.Path,
+			Recursive:  item.Recursive,
+			RootOnly:   item.RootOnly,
+			AutoDetect: item.AutoDetect,
+			Exclude:    item.Exclude,
+			Include:    item.Include,
+		}
+
+		// Only set Directory if AutoDetect is false
+		if !item.AutoDetect {
+			autoCopyItem.Directory = item.Directory
+		}
+
+		autoCopyConfig.Items[i] = autoCopyItem
 	}
 
 	// Validate configuration
-	if err := autocopy.ValidateAutoCopyConfig(config); err != nil {
+	if err := autocopy.ValidateAutoCopyConfig(autoCopyConfig); err != nil {
 		return fmt.Errorf("invalid auto-copy configuration: %w", err)
 	}
 
 	// Skip if no configuration found
-	if config.Version == 0 && len(config.Items) == 0 && len(config.Files) == 0 {
+	if autoCopyConfig.Version == 0 && len(autoCopyConfig.Items) == 0 && len(autoCopyConfig.Files) == 0 {
 		if verbose {
 			fmt.Println("ℹ️  No auto-copy configuration found, skipping file copying")
 		}
@@ -175,7 +194,7 @@ func autoCopyFiles(srcRoot, worktreePath string) error {
 
 	// Create auto-copier and copy files
 	copier := autocopy.NewLegacyAutoCopier()
-	copiedFiles, err := copier.CopyFiles(srcRoot, worktreePath, config)
+	copiedFiles, err := copier.CopyFiles(srcRoot, worktreePath, autoCopyConfig)
 	if err != nil {
 		return fmt.Errorf("failed to copy files: %w", err)
 	}
