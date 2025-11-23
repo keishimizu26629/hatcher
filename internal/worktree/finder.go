@@ -37,7 +37,7 @@ func (f *Finder) FindWorktree(branchName string) (string, bool, error) {
 		branchName,
 	)
 
-	// First, try to find by exact branch match
+	// First, try to find by exact branch match (works for any worktree, not just hatcher-managed)
 	for _, wt := range worktrees {
 		if wt.Branch == branchName {
 			return wt.Path, true, nil

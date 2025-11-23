@@ -259,13 +259,20 @@ func (r *Remover) ConfirmRemoval(plan *RemovalPlan, skipConfirm bool) bool {
 		return true
 	}
 
-	// In a real implementation, this would prompt the user for confirmation
-	// For now, we'll simulate declining dangerous operations
-	if len(plan.Warnings) > 0 || plan.WillRemoveLocalBranch || plan.WillRemoveRemoteBranch {
-		return false // Simulate user declining dangerous operations
+	// Display what will be removed
+	fmt.Printf("\nThe following actions will be performed:\n")
+	fmt.Printf("%s\n", plan.Description)
+
+	// Display warnings if any
+	if len(plan.Warnings) > 0 {
+		fmt.Printf("\n⚠️  Warnings:\n")
+		for _, warning := range plan.Warnings {
+			fmt.Printf("  - %s\n", warning)
+		}
 	}
 
-	return true // Simulate user accepting safe operations
+	// Prompt for confirmation
+	return r.promptUser("\nDo you want to continue?")
 }
 
 // hasUncommittedChanges checks if a worktree has uncommitted changes
