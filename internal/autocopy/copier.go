@@ -205,8 +205,23 @@ func (lac *LegacyAutoCopier) findRecursiveFilesWithRootOnly(filename, sourceDir,
 	if rootOnly {
 		// Only check root level
 		rootPath := filepath.Join(sourceDir, filename)
-		if info, err := os.Stat(rootPath); err == nil && !info.IsDir() {
-			destPath := filepath.Join(destDir, filename)
+		info, err := os.Stat(rootPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return copiedFiles, nil // File/directory doesn't exist, return empty
+			}
+			return nil, err
+		}
+
+		destPath := filepath.Join(destDir, filename)
+		if info.IsDir() {
+			// Copy directory with contents
+			if err := lac.copyDirectory(rootPath, destPath, true); err != nil {
+				return nil, err
+			}
+			copiedFiles = append(copiedFiles, filename)
+		} else {
+			// Copy file
 			if err := lac.copyFile(rootPath, destPath); err != nil {
 				return nil, err
 			}
