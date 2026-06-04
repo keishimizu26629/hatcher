@@ -139,8 +139,8 @@ func (m *Manager) ValidateConfig(config *Config) []string {
 	var errors []string
 
 	// Validate AutoCopy configuration
-	if config.AutoCopy.Version < 1 || config.AutoCopy.Version > 2 {
-		errors = append(errors, fmt.Sprintf("unsupported autocopy version: %d", config.AutoCopy.Version))
+	if config.AutoCopy.Version != 0 && (config.AutoCopy.Version < 1 || config.AutoCopy.Version > 2) {
+		errors = append(errors, fmt.Sprintf("unsupported version: autocopy %d", config.AutoCopy.Version))
 	}
 
 	for i, item := range config.AutoCopy.Items {
@@ -190,35 +190,30 @@ func (m *Manager) ValidateConfig(config *Config) []string {
 func (m *Manager) MigrateConfig(rawConfig map[string]interface{}) (*Config, error) {
 	config := m.defaultConfig.copy()
 
-	version, ok := rawConfig["version"].(float64)
-	if !ok {
-		version = 1 // Default to v1 if no version specified
-	}
+	version := getInt(rawConfig["version"], 1)
 
-	switch int(version) {
+	switch version {
 	case 1:
 		// Migrate from v1 to v2
-		if files, ok := rawConfig["files"].([]interface{}); ok {
+		if files := getStringSlice(rawConfig["files"]); len(files) > 0 {
 			config.AutoCopy.Version = 2
 			config.AutoCopy.Items = make([]AutoCopyItem, 0, len(files))
 
 			for _, file := range files {
-				if filePath, ok := file.(string); ok {
-					item := AutoCopyItem{
-						Path:       filePath,
-						AutoDetect: true,
-					}
-
-					// Auto-detect if it's a directory
-					if strings.HasSuffix(filePath, "/") {
-						item.Directory = testutil.BoolPtr(true)
-						item.Recursive = true
-					} else {
-						item.Directory = testutil.BoolPtr(false)
-					}
-
-					config.AutoCopy.Items = append(config.AutoCopy.Items, item)
+				item := AutoCopyItem{
+					Path:       file,
+					AutoDetect: true,
 				}
+
+				// Auto-detect if it's a directory
+				if strings.HasSuffix(file, "/") {
+					item.Directory = testutil.BoolPtr(true)
+					item.Recursive = true
+				} else {
+					item.Directory = testutil.BoolPtr(false)
+				}
+
+				config.AutoCopy.Items = append(config.AutoCopy.Items, item)
 			}
 		}
 
@@ -229,7 +224,7 @@ func (m *Manager) MigrateConfig(rawConfig map[string]interface{}) (*Config, erro
 		}
 
 	default:
-		return nil, fmt.Errorf("unsupported config version: %d", int(version))
+		return nil, fmt.Errorf("unsupported config version: %d", version)
 	}
 
 	return config, nil
@@ -257,7 +252,7 @@ func (m *Manager) GetConfigPaths(projectPath string) []string {
 		)
 	}
 
-	return paths
+	return uniquePaths(paths)
 }
 
 // loadGlobalConfig loads global configuration
@@ -409,29 +404,93 @@ func (m *Manager) mergeConfig(config *Config, rawConfig map[string]interface{}) 
 
 // parseV2Config parses v2 configuration format
 func (m *Manager) parseV2Config(config *Config, rawConfig map[string]interface{}) error {
+	if _, hasItems := rawConfig["items"]; hasItems {
+		return m.parseAutoCopyConfig(&config.AutoCopy, rawConfig)
+	}
+	if _, hasFiles := rawConfig["files"]; hasFiles {
+		return m.parseAutoCopyConfig(&config.AutoCopy, rawConfig)
+	}
 	return m.mergeConfig(config, rawConfig)
 }
 
 // parseAutoCopyConfig parses auto-copy configuration
 func (m *Manager) parseAutoCopyConfig(config *AutoCopyConfig, raw map[string]interface{}) error {
-	if version, ok := raw["version"].(float64); ok {
-		config.Version = int(version)
+	if rawVersion, ok := raw["version"]; ok {
+		config.Version = getInt(rawVersion, config.Version)
 	}
 
-	if items, ok := raw["items"].([]interface{}); ok {
+	if items := getMapSlice(raw["items"]); len(items) > 0 {
 		config.Items = make([]AutoCopyItem, 0, len(items))
 		for _, item := range items {
-			if itemMap, ok := item.(map[string]interface{}); ok {
-				var autoCopyItem AutoCopyItem
-				if err := m.parseAutoCopyItem(&autoCopyItem, itemMap); err != nil {
-					return err
-				}
-				config.Items = append(config.Items, autoCopyItem)
+			var autoCopyItem AutoCopyItem
+			if err := m.parseAutoCopyItem(&autoCopyItem, item); err != nil {
+				return err
 			}
+			config.Items = append(config.Items, autoCopyItem)
 		}
 	}
 
 	return nil
+}
+
+func getInt(value interface{}, fallback int) int {
+	switch typed := value.(type) {
+	case int:
+		return typed
+	case int64:
+		return int(typed)
+	case float64:
+		return int(typed)
+	default:
+		return fallback
+	}
+}
+
+func getStringSlice(value interface{}) []string {
+	switch typed := value.(type) {
+	case []string:
+		return typed
+	case []interface{}:
+		values := make([]string, 0, len(typed))
+		for _, item := range typed {
+			if str, ok := item.(string); ok {
+				values = append(values, str)
+			}
+		}
+		return values
+	default:
+		return nil
+	}
+}
+
+func getMapSlice(value interface{}) []map[string]interface{} {
+	switch typed := value.(type) {
+	case []map[string]interface{}:
+		return typed
+	case []interface{}:
+		values := make([]map[string]interface{}, 0, len(typed))
+		for _, item := range typed {
+			if itemMap, ok := item.(map[string]interface{}); ok {
+				values = append(values, itemMap)
+			}
+		}
+		return values
+	default:
+		return nil
+	}
+}
+
+func uniquePaths(paths []string) []string {
+	seen := make(map[string]bool, len(paths))
+	unique := make([]string, 0, len(paths))
+	for _, path := range paths {
+		if seen[path] {
+			continue
+		}
+		seen[path] = true
+		unique = append(unique, path)
+	}
+	return unique
 }
 
 // parseAutoCopyItem parses a single auto-copy item
