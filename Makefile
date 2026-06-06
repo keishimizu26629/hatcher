@@ -11,7 +11,7 @@ COMMIT?=$(shell git rev-parse --short HEAD)
 DATE?=$(shell date -u '+%Y-%m-%d_%H:%M:%S')
 
 # Build flags
-LDFLAGS=-ldflags "-X main.Version=$(VERSION) -X main.Commit=$(COMMIT) -X main.Date=$(DATE)"
+LDFLAGS=-ldflags "-X github.com/keisukeshimizu/hatcher/cmd.Version=$(VERSION)"
 
 # Go parameters
 GOCMD=go

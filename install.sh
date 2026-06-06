@@ -149,7 +149,7 @@ build_from_source() {
     cd "hatcher-${VERSION#v}"
 
     # Build binary
-    go build -ldflags "-s -w -X main.Version=$VERSION" -o "$TEMP_DIR/$BINARY_NAME" ./main.go
+    go build -ldflags "-s -w -X github.com/keisukeshimizu/hatcher/cmd.Version=$VERSION" -o "$TEMP_DIR/$BINARY_NAME" ./main.go
 
     log_success "Built from source successfully"
 }

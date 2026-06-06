@@ -16,13 +16,14 @@ var (
 	noGitignoreUpdate bool
 	force             bool
 	editor            string
+	baseRef           string
 )
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create <branch-name>",
 	Short: "Create a new worktree for the specified branch",
-	Long: `Create a new Git worktree with automatic directory naming and file copying.
+	Long: `Create a new worktree with automatic directory naming and file copying.
 
 The worktree will be created in the parent directory of the current Git repository
 with the naming pattern: {project-name}-{branch-name-safe}
@@ -30,6 +31,7 @@ with the naming pattern: {project-name}-{branch-name-safe}
 Examples:
   hatcher create feature/user-auth    # Creates: ../myapp-feature-user-auth
   hatcher feature/user-auth           # Same as above (default command)
+  hatcher create --base origin/dev feature/user-auth
   hatcher create --no-copy main       # Skip auto file copying
   hatcher create --force test         # Overwrite existing directory`,
 	Args: cobra.ExactArgs(1),
@@ -44,6 +46,7 @@ func init() {
 	createCmd.Flags().BoolVar(&noGitignoreUpdate, "no-gitignore-update", false, "skip .gitignore update")
 	createCmd.Flags().BoolVar(&force, "force", false, "force overwrite existing directory")
 	createCmd.Flags().StringVar(&editor, "editor", "", "open in specified editor after creation (cursor, code)")
+	createCmd.Flags().StringVar(&baseRef, "base", "", "base ref to create a new branch from (for example origin/dev)")
 }
 
 func runCreate(cmd *cobra.Command, args []string) error {
@@ -55,7 +58,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 	log.Debug("Starting worktree creation process")
 	log.Verbose("Branch name: %s", branchName)
-	log.Verbose("Flags - Force: %t, NoCopy: %t, NoGitignoreUpdate: %t, DryRun: %t", force, noCopy, noGitignoreUpdate, dryRun)
+	log.Verbose("Flags - Force: %t, NoCopy: %t, NoGitignoreUpdate: %t, DryRun: %t, Base: %s", force, noCopy, noGitignoreUpdate, dryRun, baseRef)
 
 	if verbose {
 		fmt.Printf("🔍 Creating worktree for branch '%s'\n", branchName)
@@ -80,6 +83,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		NoCopy:            noCopy,
 		NoGitignoreUpdate: noGitignoreUpdate,
 		DryRun:            dryRun,
+		BaseRef:           baseRef,
 	}
 
 	fmt.Printf("📁 Target directory: %s\n", worktree.GenerateWorktreePath(
@@ -99,6 +103,9 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		fmt.Printf("  - %s\n", result.Message)
 		if result.IsNewBranch {
 			fmt.Printf("  - Create new branch: %s\n", result.BranchName)
+			if baseRef != "" {
+				fmt.Printf("  - Base ref: %s\n", baseRef)
+			}
 		} else {
 			fmt.Printf("  - Use existing branch: %s\n", result.BranchName)
 		}
