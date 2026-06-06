@@ -61,6 +61,18 @@ make install
 curl -fsSL https://keishimizu26629.github.io/hatcher/uninstall.sh | bash
 ```
 
+## 🚀 Automated Releases
+
+Hatcher uses automated release workflows:
+
+- **Auto-release**: Commits to `main` branch automatically create new releases based on commit messages
+- **Semantic versioning**:
+  - `feat:` or `✨` → Minor version bump (1.0.0 → 1.1.0)
+  - `fix:` or `🔧` → Patch version bump (1.0.0 → 1.0.1)
+  - `BREAKING CHANGE:` or `!` → Major version bump (1.0.0 → 2.0.0)
+- **Binary distribution**: All platforms built and released automatically
+- **Install script updates**: GitHub Pages automatically updated
+
 ## 🎯 Quick Start
 
 ```bash
@@ -129,36 +141,58 @@ hatcher doctor                     # Validate configuration
 
 ## ⚙️ Configuration
 
-### Auto-Copy Files
-Configure files to automatically copy to new worktrees:
+### Default Auto-Copy Files
+
+By default, Hatcher automatically copies these files/directories to new worktrees:
+
+- `.ai/` - AI assistant configurations (directory with contents)
+- `.cursorrules` - Cursor editor rules
+- `.clinerules` - Cline rules
+- `CLAUDE.md` - Claude Code instructions
+
+### Custom Configuration
+
+Create a configuration file to customize which files are copied:
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "items": [
     {
       "path": ".ai/",
       "directory": true,
-      "recursive": false,
+      "recursive": true,
       "rootOnly": true
     },
     {
-      "path": "**/.cursorrules",
+      "path": ".cursorrules",
+      "rootOnly": true,
       "autoDetect": true
     },
     {
       "path": "CLAUDE.md",
       "directory": false,
       "rootOnly": true
+    },
+    {
+      "path": "**/.cursorrules",
+      "autoDetect": true
     }
   ]
 }
 ```
 
+**Configuration Options:**
+- `path` - File or directory path (supports `**/*.ext` glob patterns)
+- `directory` - Explicitly mark as directory (`true`) or file (`false`)
+- `recursive` - Copy directory contents recursively
+- `rootOnly` - Only copy from project root (not subdirectories)
+- `autoDetect` - Auto-detect if path is file or directory
+
 **Configuration Priority:**
-1. `.vscode/auto-copy-files.json` (VS Code specific)
-2. `.worktree-files/auto-copy-files.json` (project-specific)
-3. `~/.config/git/worktree-files/auto-copy-files.json` (global)
+1. `.hatcher-auto-copy.json` (project root)
+2. `.hatcher/config.json` (project directory)
+3. `~/.hatcher/config.yaml` (global)
 
 ## 🔧 Development
 

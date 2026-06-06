@@ -28,6 +28,7 @@ type CreateOptions struct {
 	NoCopy            bool
 	NoGitignoreUpdate bool
 	DryRun            bool
+	BaseRef           string
 }
 
 // CreateResult contains the result of worktree creation
@@ -93,7 +94,7 @@ func (c *Creator) Create(opts CreateOptions) (*CreateResult, error) {
 	}
 
 	// Create the worktree
-	if err := c.repo.CreateWorktree(worktreePath, opts.BranchName, isNewBranch); err != nil {
+	if err := c.repo.CreateWorktree(worktreePath, opts.BranchName, isNewBranch, opts.BaseRef); err != nil {
 		return nil, fmt.Errorf("failed to create worktree: %w", err)
 	}
 
@@ -114,7 +115,13 @@ func ValidateBranchName(branch string) error {
 	}
 
 	// Check for dangerous characters
-	dangerous := []string{"..", "|", "&", ";", "$", "`", "\\"}
+	if strings.Contains(branch, "/../") ||
+		strings.HasPrefix(branch, "../") ||
+		strings.HasSuffix(branch, "/..") {
+		return fmt.Errorf("branch name contains dangerous character: ..")
+	}
+
+	dangerous := []string{"|", "&", ";", "$", "`", "\\"}
 	for _, char := range dangerous {
 		if strings.Contains(branch, char) {
 			return fmt.Errorf("branch name contains dangerous character: %s", char)

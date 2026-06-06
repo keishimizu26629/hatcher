@@ -24,7 +24,7 @@ type Repository interface {
 	RemoveRemoteBranch(branch string) error
 
 	// Worktree operations
-	CreateWorktree(path, branch string, newBranch bool) error
+	CreateWorktree(path, branch string, newBranch bool, baseRef ...string) error
 	RemoveWorktree(path string, force bool) error
 	ListWorktrees() ([]Worktree, error)
 	GetWorktreePath(branch string) (string, error)
@@ -189,11 +189,15 @@ func (r *GitRepository) RemoveRemoteBranch(branch string) error {
 }
 
 // CreateWorktree creates a new Git worktree
-func (r *GitRepository) CreateWorktree(path, branch string, newBranch bool) error {
+func (r *GitRepository) CreateWorktree(path, branch string, newBranch bool, baseRef ...string) error {
 	var cmd *exec.Cmd
 
 	if newBranch {
-		cmd = exec.Command("git", "worktree", "add", "-b", branch, path)
+		args := []string{"worktree", "add", "-b", branch, path}
+		if len(baseRef) > 0 && baseRef[0] != "" {
+			args = append(args, baseRef[0])
+		}
+		cmd = exec.Command("git", args...)
 	} else {
 		cmd = exec.Command("git", "worktree", "add", path, branch)
 	}

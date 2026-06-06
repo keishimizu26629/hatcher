@@ -15,6 +15,8 @@ var (
 	dryRun    bool
 	noColor   bool
 	configDir string
+	// Version is set by build flags
+	Version = "dev"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -37,7 +39,7 @@ Examples:
   hatcher move main            # Switch to main worktree in editor
   hatcher remove old-feature   # Remove completed worktree
   hatcher list                 # Show all managed worktrees`,
-	Version: "1.0.0",
+	Version: Version,
 	// Default command: create worktree
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

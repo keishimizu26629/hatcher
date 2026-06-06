@@ -43,10 +43,10 @@ confirm_uninstall() {
     echo "  - $INSTALL_DIR/hch"
     echo "  - $CONFIG_DIR (configuration files)"
     echo
-    
+
     read -p "Are you sure you want to uninstall Hatcher? (y/N): " -n 1 -r
     echo
-    
+
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         log_info "Uninstallation cancelled"
         exit 0
@@ -55,10 +55,10 @@ confirm_uninstall() {
 
 remove_binaries() {
     log_info "Removing Hatcher binaries..."
-    
+
     local hatcher_path="$INSTALL_DIR/$BINARY_NAME"
     local hch_path="$INSTALL_DIR/hch"
-    
+
     # Remove hatcher binary
     if [ -f "$hatcher_path" ]; then
         if [ -w "$INSTALL_DIR" ]; then
@@ -70,7 +70,7 @@ remove_binaries() {
     else
         log_warning "$hatcher_path not found"
     fi
-    
+
     # Remove hch alias
     if [ -f "$hch_path" ] || [ -L "$hch_path" ]; then
         if [ -w "$INSTALL_DIR" ]; then
@@ -86,11 +86,11 @@ remove_binaries() {
 
 remove_config() {
     log_info "Removing configuration files..."
-    
+
     if [ -d "$CONFIG_DIR" ]; then
         read -p "Remove configuration directory $CONFIG_DIR? (y/N): " -n 1 -r
         echo
-        
+
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             rm -rf "$CONFIG_DIR"
             log_success "Removed $CONFIG_DIR"
@@ -104,14 +104,14 @@ remove_config() {
 
 verify_removal() {
     log_info "Verifying removal..."
-    
+
     if command -v hatcher >/dev/null 2>&1; then
         log_warning "hatcher command still found in PATH"
         log_info "You may need to restart your shell or check other installation locations"
     else
         log_success "hatcher command removed from PATH"
     fi
-    
+
     if command -v hch >/dev/null 2>&1; then
         log_warning "hch command still found in PATH"
     else
@@ -121,23 +121,23 @@ verify_removal() {
 
 check_homebrew() {
     log_info "Checking for Homebrew installation..."
-    
+
     if command -v brew >/dev/null 2>&1; then
         if brew list | grep -q "^hatcher$"; then
             log_warning "Hatcher is also installed via Homebrew"
             echo
             read -p "Remove Homebrew installation as well? (y/N): " -n 1 -r
             echo
-            
+
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 brew uninstall hatcher
                 log_success "Removed Homebrew installation"
-                
+
                 # Check if tap should be removed
                 if brew tap | grep -q "keishimizu26629/tap"; then
                     read -p "Remove keishimizu26629/tap as well? (y/N): " -n 1 -r
                     echo
-                    
+
                     if [[ $REPLY =~ ^[Yy]$ ]]; then
                         brew untap keishimizu26629/tap
                         log_success "Removed Homebrew tap"
@@ -154,7 +154,7 @@ main() {
     remove_binaries
     remove_config
     verify_removal
-    
+
     echo
     log_success "🎉 Hatcher uninstallation completed!"
     echo
